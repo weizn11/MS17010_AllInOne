@@ -33,7 +33,7 @@ int main(int args, char *argv[])
     strcat(targetDesc.port, "445");
     strcat(targetDesc.proto, "SMB");
 
-    if(attack_target(&targetDesc) == 0)
+    if(attack_target(&targetDesc, RETRY_COUNT) == 0)
     {
         printf("[+] Attack Succeeded!\n");
     }

