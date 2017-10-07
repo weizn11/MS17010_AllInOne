@@ -105,7 +105,7 @@ int recv_from_anony_pipe(ANONY_PIPE_DESC *pPipeDesc,
     char recvBuf[PIPE_RECV_BUFF_SIZE];
     int lBytesRead = 0;
     int lastErr = 0;
-    int exitCode;
+    int exitCode = 0;
 
     if(pPipeDesc->status < 0)
     {
@@ -114,35 +114,42 @@ int recv_from_anony_pipe(ANONY_PIPE_DESC *pPipeDesc,
 
     while (1)
     {
-        memset(recvBuf, 0x00, sizeof(recvBuf));
-        if(PeekNamedPipe(pPipeDesc->hRdStdout, recvBuf, sizeof(recvBuf) - 1, &lBytesRead, 0, 0) != 0)
-        {
-            if(lBytesRead > 0)
-            {
-                //recv from pipe
-                if (!ReadFile(pPipeDesc->hRdStdout, recvBuf, sizeof(recvBuf) - 1, &lBytesRead, 0))
-                {
-                    return RCV_PIPE_ERR_RECV;
-                }
+        //检查子进程是否退出
+        GetExitCodeProcess(pPipeDesc->pi.hProcess, &exitCode);
 
-                if(recv_handler != NULL)
+        do
+        {
+            memset(recvBuf, 0x00, sizeof(recvBuf));
+            if(PeekNamedPipe(pPipeDesc->hRdStdout, recvBuf, sizeof(recvBuf) - 1, &lBytesRead, 0, 0) != 0)
+            {
+                if(lBytesRead > 0)
                 {
-                    if(recv_handler(recvBuf, lBytesRead, hdrParam) != 0)
+                    //recv from pipe
+                    if (!ReadFile(pPipeDesc->hRdStdout, recvBuf, sizeof(recvBuf) - 1, &lBytesRead, 0))
                     {
-                        return RCV_PIPE_NORMAL;
+                        return RCV_PIPE_ERR_RECV;
+                    }
+
+                    if(recv_handler != NULL)
+                    {
+                        if(recv_handler(recvBuf, lBytesRead, hdrParam) != 0)
+                        {
+                            return RCV_PIPE_NORMAL;
+                        }
+                    }
+                    else
+                    {
+                        printf("%s", recvBuf);
                     }
                 }
-                else
-                {
-                    printf("%s", recvBuf);
-                }
+            }
+            else
+            {
+                lastErr = GetLastError();
+                return RCV_PIPE_ERR_PEEK;
             }
         }
-        else
-        {
-            lastErr = GetLastError();
-            return RCV_PIPE_ERR_PEEK;
-        }
+        while(lBytesRead > 0);
 
         if(need_exit != NULL)
         {
@@ -156,8 +163,7 @@ int recv_from_anony_pipe(ANONY_PIPE_DESC *pPipeDesc,
             return RCV_PIPE_NORMAL;
         }
 
-        //检查子进程是否退出
-        GetExitCodeProcess(pPipeDesc->pi.hProcess, &exitCode);
+        //子进程已退出
         if(exitCode != STILL_ACTIVE)
         {
             return RCV_PIPE_NORMAL;
@@ -174,13 +180,13 @@ typedef struct __Full_Recv_Param_
     char *pRecvBuf;
     int bufSize;
 
-}_FULL_RCV_PARAM;
+} _FULL_RCV_PARAM;
 
 typedef struct __Exit_Param_
 {
     unsigned long startTime;
     unsigned long timeout;
-}_EXIT_PARAM;
+} _EXIT_PARAM;
 
 static int _need_exit(void *param)
 {

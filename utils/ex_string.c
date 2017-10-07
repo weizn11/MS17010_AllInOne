@@ -127,8 +127,82 @@ int replace_str(char *pStrBuf, char *pOld, char *pNew)
     return 0;
 }
 
+char *upper_str(char *pStr)
+{
+    static char upStrBuf[65536];
+    int idx;
 
+    memset(upStrBuf, 0x00, sizeof(upStrBuf));
 
+    for(idx = 0; pStr[idx] != NULL; ++idx)
+    {
+        if(pStr[idx] >= 'a' && pStr[idx] <= 'z')
+        {
+            upStrBuf[idx] = pStr[idx] - 32;
+        }
+        else
+        {
+            upStrBuf[idx] = pStr[idx];
+        }
+    }
+
+    return upStrBuf;
+}
+
+char *lower_str(char *pStr)
+{
+    static char upStrBuf[65536];
+    int idx;
+
+    memset(upStrBuf, 0x00, sizeof(upStrBuf));
+
+    for(idx = 0; pStr[idx] != NULL; ++idx)
+    {
+        if(pStr[idx] >= 'A' && pStr[idx] <= 'Z')
+        {
+            upStrBuf[idx] = pStr[idx] + 32;
+        }
+        else
+        {
+            upStrBuf[idx] = pStr[idx];
+        }
+    }
+
+    return upStrBuf;
+}
+
+char* strtok_r(
+    char *str,
+    const char *delim,
+    char **nextp)
+{
+    char *ret;
+
+    if (str == NULL)
+    {
+        str = *nextp;
+    }
+
+    str += strspn(str, delim);
+
+    if (*str == '\0')
+    {
+        return NULL;
+    }
+
+    ret = str;
+
+    str += strcspn(str, delim);
+
+    if (*str)
+    {
+        *str++ = '\0';
+    }
+
+    *nextp = str;
+
+    return ret;
+}
 
 
 
