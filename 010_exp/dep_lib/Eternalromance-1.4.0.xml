@@ -1,0 +1,368 @@
+<t:config xmlns:t="urn:trch" id="df1cc1973caa2c3e1bbe4d2e48ffd23e50e4e428" configversion="1.4.0.0" name="Eternalromance" version="1.4.0" schemaversion="2.0.0">
+<t:inputparameters>
+<t:parameter name="NetworkTimeout" description="Timeout for blocking network calls (in seconds).  Use -1 for no timeout." type="S16" format="Scalar" valid="true">
+<t:default>60</t:default>
+<t:value>60</t:value>
+</t:parameter>
+<t:parameter name="TargetIp" description="Target IP Address" type="IPv4" format="Scalar" valid="true">
+<t:value>_Target_IP_</t:value>
+</t:parameter>
+<t:parameter name="TargetPort" description="Target TCP port" type="TcpPort" format="Scalar" valid="true">
+<t:default>445</t:default>
+<t:value>_Target_Port_</t:value>
+</t:parameter>
+<t:parameter name="MaxExploitAttempts" description="Number of tries to exploit. Default 3" type="U32" format="Scalar" hidden="true" valid="true">
+<t:default>3</t:default>
+<t:value>3</t:value>
+</t:parameter>
+<t:parameter name="PipeName" description="The named pipe to use" type="String" format="Scalar" valid="true">
+<t:value>_Pipe_Name_</t:value>
+</t:parameter>
+<t:parameter name="ShellcodeFile" description="DOPU (ensure correct architecture) ONLY! Other shellcode will likely BSOD." type="LocalFile" format="Scalar" valid="true">
+<t:value>_Shellcode_File_</t:value>
+</t:parameter>
+<t:paramchoice name="ExploitMethod" description="Which exploit method to use">
+<t:default>Default</t:default>
+<t:value>_Exploit_Method_</t:value>
+<t:paramgroup name="Default" description="Use the best exploit method(s) for the target OS">
+<t:parameter name="ExploitMethodChoice" description="" type="U32" format="Scalar" hidden="true" valid="true">
+<t:default>0</t:default>
+<t:value>0</t:value>
+</t:parameter>
+</t:paramgroup>
+<t:paramgroup name="Fish-in-a-barrel" description="Most reliable exploit method (XP/2k3 only)">
+<t:parameter name="ExploitMethodChoice" description="" type="U32" format="Scalar" hidden="true" valid="true">
+<t:default>1</t:default>
+<t:value>1</t:value>
+</t:parameter>
+</t:paramgroup>
+<t:paramgroup name="Matched-pairs" description="Next reliable exploit method (XP/Win7/2k8R2 only)">
+<t:parameter name="ExploitMethodChoice" description="" type="U32" format="Scalar" hidden="true" valid="true">
+<t:default>2</t:default>
+<t:value>2</t:value>
+</t:parameter>
+</t:paramgroup>
+<t:paramgroup name="Classic-Romance" description="Original LargePageGroom exploit method (All OS Versions)">
+<t:parameter name="ExploitMethodChoice" description="" type="U32" format="Scalar" hidden="true" valid="true">
+<t:default>3</t:default>
+<t:value>3</t:value>
+</t:parameter>
+</t:paramgroup>
+</t:paramchoice>
+<t:paramchoice name="Credentials" description="Type of credentials to use">
+<t:default>Anonymous</t:default>
+<t:value>Anonymous</t:value>
+<t:paramgroup name="Anonymous" description="Anonymous (NULL session)">
+<t:parameter name="CredChoice" description="" type="U32" format="Scalar" hidden="true" valid="true">
+<t:default>0</t:default>
+<t:value>0</t:value>
+</t:parameter>
+<t:parameter name="Username" description="" type="Buffer" format="Scalar" hidden="true" valid="true">
+<t:default></t:default>
+<t:value></t:value>
+</t:parameter>
+<t:parameter name="Password" description="" type="Buffer" format="Scalar" hidden="true" valid="true">
+<t:default></t:default>
+<t:value></t:value>
+</t:parameter>
+</t:paramgroup>
+<t:paramgroup name="Guest" description="Guest account">
+<t:parameter name="CredChoice" description="" type="U32" format="Scalar" hidden="true" valid="true">
+<t:default>1</t:default>
+<t:value>1</t:value>
+</t:parameter>
+<t:parameter name="Password" description="" type="Buffer" format="Scalar" hidden="true" valid="true">
+<t:default></t:default>
+<t:value></t:value>
+</t:parameter>
+</t:paramgroup>
+<t:paramgroup name="Blank" description="User account with no password set">
+<t:parameter name="CredChoice" description="" type="U32" format="Scalar" hidden="true" valid="true">
+<t:default>2</t:default>
+<t:value>2</t:value>
+</t:parameter>
+<t:parameter name="Username" description="Username entered as hex bytes (in unicode)" type="Buffer" format="Scalar"></t:parameter>
+<t:parameter name="Password" description="" type="Buffer" format="Scalar" hidden="true" valid="true">
+<t:default></t:default>
+<t:value></t:value>
+</t:parameter>
+</t:paramgroup>
+<t:paramgroup name="Password" description="User name and password">
+<t:parameter name="CredChoice" description="" type="U32" format="Scalar" hidden="true" valid="true">
+<t:default>3</t:default>
+<t:value>3</t:value>
+</t:parameter>
+<t:parameter name="Username" description="Username entered as hex bytes (in unicode)" type="Buffer" format="Scalar"></t:parameter>
+<t:parameter name="Password" description="Password entered as hex bytes (in unicode)" type="Buffer" format="Scalar"></t:parameter>
+</t:paramgroup>
+<t:paramgroup name="NTLM" description="User name and NTLM hash">
+<t:parameter name="CredChoice" description="" type="U32" format="Scalar" hidden="true" valid="true">
+<t:default>4</t:default>
+<t:value>4</t:value>
+</t:parameter>
+<t:parameter name="Username" description="Username entered as hex bytes (in unicode)" type="Buffer" format="Scalar"></t:parameter>
+<t:parameter name="NtlmHash" description="NTLM password hash (in hex)" type="Buffer" format="Scalar"></t:parameter>
+</t:paramgroup>
+</t:paramchoice>
+<t:paramchoice name="Protocol" description="SMB (default port 445) or NBT (default port 139)">
+<t:default>SMB</t:default>
+<t:value>_Proto_Type_</t:value>
+<t:paramgroup name="SMB" description="">
+<t:parameter name="UsingNbt" description="Boolean stating to use Nbt or not" type="Boolean" format="Scalar" hidden="true" valid="true">
+<t:default>0</t:default>
+<t:value>false</t:value>
+</t:parameter>
+</t:paramgroup>
+<t:paramgroup name="NBT" description="">
+<t:parameter name="UsingNbt" description="Boolean stating to use Nbt or not" type="Boolean" format="Scalar" hidden="true" valid="true">
+<t:default>1</t:default>
+<t:value>true</t:value>
+</t:parameter>
+</t:paramgroup>
+</t:paramchoice>
+<t:paramchoice name="Target" description="Operating System, Service Pack, of target OS">
+<t:value>_Target_OS_</t:value>
+<t:paramgroup name="XP_SP0SP1_X86" description="Windows XP Sp0 and Sp1, 32-bit">
+<t:parameter name="OsMajor" description="OS Major Version" type="U8" format="Scalar" hidden="true" valid="true">
+<t:default>5</t:default>
+<t:value>5</t:value>
+</t:parameter>
+<t:parameter name="OsMinor" description="OS Minor Version" type="U8" format="Scalar" hidden="true" valid="true">
+<t:default>1</t:default>
+<t:value>1</t:value>
+</t:parameter>
+<t:parameter name="OsServicePack" description="OS Service Pack Level" type="U8" format="Scalar" hidden="true" valid="true">
+<t:default>0</t:default>
+<t:value>0</t:value>
+</t:parameter>
+</t:paramgroup>
+<t:paramgroup name="XP_SP2SP3_X86" description="Windows XP Sp2 and Sp3, 32-bit">
+<t:parameter name="OsMajor" description="OS Major Version" type="U8" format="Scalar" hidden="true" valid="true">
+<t:default>5</t:default>
+<t:value>5</t:value>
+</t:parameter>
+<t:parameter name="OsMinor" description="OS Minor Version" type="U8" format="Scalar" hidden="true" valid="true">
+<t:default>1</t:default>
+<t:value>1</t:value>
+</t:parameter>
+<t:parameter name="OsServicePack" description="OS Service Pack Level" type="U8" format="Scalar" hidden="true" valid="true">
+<t:default>2</t:default>
+<t:value>2</t:value>
+</t:parameter>
+</t:paramgroup>
+<t:paramgroup name="XP_SP1_X64" description="Windows XP Sp1, 64-bit">
+<t:parameter name="OsMajor" description="OS Major Version" type="U8" format="Scalar" hidden="true" valid="true">
+<t:default>5</t:default>
+<t:value>5</t:value>
+</t:parameter>
+<t:parameter name="OsMinor" description="OS Minor Version" type="U8" format="Scalar" hidden="true" valid="true">
+<t:default>2</t:default>
+<t:value>2</t:value>
+</t:parameter>
+<t:parameter name="OsServicePack" description="OS Service Pack Level" type="U8" format="Scalar" hidden="true" valid="true">
+<t:default>1</t:default>
+<t:value>1</t:value>
+</t:parameter>
+</t:paramgroup>
+<t:paramgroup name="XP_SP2_X64" description="Windows XP Sp2, 64-bit">
+<t:parameter name="OsMajor" description="OS Major Version" type="U8" format="Scalar" hidden="true" valid="true">
+<t:default>5</t:default>
+<t:value>5</t:value>
+</t:parameter>
+<t:parameter name="OsMinor" description="OS Minor Version" type="U8" format="Scalar" hidden="true" valid="true">
+<t:default>2</t:default>
+<t:value>2</t:value>
+</t:parameter>
+<t:parameter name="OsServicePack" description="OS Service Pack Level" type="U8" format="Scalar" hidden="true" valid="true">
+<t:default>2</t:default>
+<t:value>2</t:value>
+</t:parameter>
+</t:paramgroup>
+<t:paramgroup name="SERVER_2003_SP0" description="Windows Sever 2003 Sp0, 32-bit">
+<t:parameter name="OsMajor" description="OS Major Version" type="U8" format="Scalar" hidden="true" valid="true">
+<t:default>5</t:default>
+<t:value>5</t:value>
+</t:parameter>
+<t:parameter name="OsMinor" description="OS Minor Version" type="U8" format="Scalar" hidden="true" valid="true">
+<t:default>2</t:default>
+<t:value>2</t:value>
+</t:parameter>
+<t:parameter name="OsServicePack" description="OS Service Pack Level" type="U8" format="Scalar" hidden="true" valid="true">
+<t:default>0</t:default>
+<t:value>0</t:value>
+</t:parameter>
+</t:paramgroup>
+<t:paramgroup name="SERVER_2003_SP1" description="Windows Sever 2003 Sp1, 32-bit/64-bit">
+<t:parameter name="OsMajor" description="OS Major Version" type="U8" format="Scalar" hidden="true" valid="true">
+<t:default>5</t:default>
+<t:value>5</t:value>
+</t:parameter>
+<t:parameter name="OsMinor" description="OS Minor Version" type="U8" format="Scalar" hidden="true" valid="true">
+<t:default>2</t:default>
+<t:value>2</t:value>
+</t:parameter>
+<t:parameter name="OsServicePack" description="OS Service Pack Level" type="U8" format="Scalar" hidden="true" valid="true">
+<t:default>1</t:default>
+<t:value>1</t:value>
+</t:parameter>
+</t:paramgroup>
+<t:paramgroup name="SERVER_2003_SP2" description="Windows Sever 2003 Sp2, 32-bit/64-bit">
+<t:parameter name="OsMajor" description="OS Major Version" type="U8" format="Scalar" hidden="true" valid="true">
+<t:default>5</t:default>
+<t:value>5</t:value>
+</t:parameter>
+<t:parameter name="OsMinor" description="OS Minor Version" type="U8" format="Scalar" hidden="true" valid="true">
+<t:default>2</t:default>
+<t:value>2</t:value>
+</t:parameter>
+<t:parameter name="OsServicePack" description="OS Service Pack Level" type="U8" format="Scalar" hidden="true" valid="true">
+<t:default>2</t:default>
+<t:value>2</t:value>
+</t:parameter>
+</t:paramgroup>
+<t:paramgroup name="VISTA_SP0" description="Windows Vista Sp0, 32-bit/64-bit">
+<t:parameter name="OsMajor" description="OS Major Version" type="U8" format="Scalar" hidden="true" valid="true">
+<t:default>6</t:default>
+<t:value>6</t:value>
+</t:parameter>
+<t:parameter name="OsMinor" description="OS Minor Version" type="U8" format="Scalar" hidden="true" valid="true">
+<t:default>0</t:default>
+<t:value>0</t:value>
+</t:parameter>
+<t:parameter name="OsServicePack" description="OS Service Pack Level" type="U8" format="Scalar" hidden="true" valid="true">
+<t:default>0</t:default>
+<t:value>0</t:value>
+</t:parameter>
+</t:paramgroup>
+<t:paramgroup name="VISTA_SP1" description="Windows Vista Sp1, 32-bit/64-bit">
+<t:parameter name="OsMajor" description="OS Major Version" type="U8" format="Scalar" hidden="true" valid="true">
+<t:default>6</t:default>
+<t:value>6</t:value>
+</t:parameter>
+<t:parameter name="OsMinor" description="OS Minor Version" type="U8" format="Scalar" hidden="true" valid="true">
+<t:default>0</t:default>
+<t:value>0</t:value>
+</t:parameter>
+<t:parameter name="OsServicePack" description="OS Service Pack Level" type="U8" format="Scalar" hidden="true" valid="true">
+<t:default>1</t:default>
+<t:value>1</t:value>
+</t:parameter>
+</t:paramgroup>
+<t:paramgroup name="VISTA_SP2" description="Windows Vista Sp2, 32-bit/64-bit">
+<t:parameter name="OsMajor" description="OS Major Version" type="U8" format="Scalar" hidden="true" valid="true">
+<t:default>6</t:default>
+<t:value>6</t:value>
+</t:parameter>
+<t:parameter name="OsMinor" description="OS Minor Version" type="U8" format="Scalar" hidden="true" valid="true">
+<t:default>0</t:default>
+<t:value>0</t:value>
+</t:parameter>
+<t:parameter name="OsServicePack" description="OS Service Pack Level" type="U8" format="Scalar" hidden="true" valid="true">
+<t:default>2</t:default>
+<t:value>2</t:value>
+</t:parameter>
+</t:paramgroup>
+<t:paramgroup name="SERVER_2008_SP0" description="Windows Server 2008 Sp0, 32-bit/64-bit">
+<t:parameter name="OsMajor" description="OS Major Version" type="U8" format="Scalar" hidden="true" valid="true">
+<t:default>6</t:default>
+<t:value>6</t:value>
+</t:parameter>
+<t:parameter name="OsMinor" description="OS Minor Version" type="U8" format="Scalar" hidden="true" valid="true">
+<t:default>0</t:default>
+<t:value>0</t:value>
+</t:parameter>
+<t:parameter name="OsServicePack" description="OS Service Pack Level" type="U8" format="Scalar" hidden="true" valid="true">
+<t:default>0</t:default>
+<t:value>0</t:value>
+</t:parameter>
+</t:paramgroup>
+<t:paramgroup name="SERVER_2008_SP1" description="Windows Server 2008 Sp1, 32-bit/64-bit">
+<t:parameter name="OsMajor" description="OS Major Version" type="U8" format="Scalar" hidden="true" valid="true">
+<t:default>6</t:default>
+<t:value>6</t:value>
+</t:parameter>
+<t:parameter name="OsMinor" description="OS Minor Version" type="U8" format="Scalar" hidden="true" valid="true">
+<t:default>0</t:default>
+<t:value>0</t:value>
+</t:parameter>
+<t:parameter name="OsServicePack" description="OS Service Pack Level" type="U8" format="Scalar" hidden="true" valid="true">
+<t:default>1</t:default>
+<t:value>1</t:value>
+</t:parameter>
+</t:paramgroup>
+<t:paramgroup name="SERVER_2008_SP2" description="Windows Server 2008 Sp2, 32-bit/64-bit">
+<t:parameter name="OsMajor" description="OS Major Version" type="U8" format="Scalar" hidden="true" valid="true">
+<t:default>6</t:default>
+<t:value>6</t:value>
+</t:parameter>
+<t:parameter name="OsMinor" description="OS Minor Version" type="U8" format="Scalar" hidden="true" valid="true">
+<t:default>0</t:default>
+<t:value>0</t:value>
+</t:parameter>
+<t:parameter name="OsServicePack" description="OS Service Pack Level" type="U8" format="Scalar" hidden="true" valid="true">
+<t:default>2</t:default>
+<t:value>2</t:value>
+</t:parameter>
+</t:paramgroup>
+<t:paramgroup name="WIN7_SP0" description="Windows 7 Sp0, 32-bit/64-bit">
+<t:parameter name="OsMajor" description="OS Major Version" type="U8" format="Scalar" hidden="true" valid="true">
+<t:default>6</t:default>
+<t:value>6</t:value>
+</t:parameter>
+<t:parameter name="OsMinor" description="OS Minor Version" type="U8" format="Scalar" hidden="true" valid="true">
+<t:default>1</t:default>
+<t:value>1</t:value>
+</t:parameter>
+<t:parameter name="OsServicePack" description="OS Service Pack Level" type="U8" format="Scalar" hidden="true" valid="true">
+<t:default>0</t:default>
+<t:value>0</t:value>
+</t:parameter>
+</t:paramgroup>
+<t:paramgroup name="WIN7_SP1" description="Windows 7 Sp1, 32-bit/64-bit">
+<t:parameter name="OsMajor" description="OS Major Version" type="U8" format="Scalar" hidden="true" valid="true">
+<t:default>6</t:default>
+<t:value>6</t:value>
+</t:parameter>
+<t:parameter name="OsMinor" description="OS Minor Version" type="U8" format="Scalar" hidden="true" valid="true">
+<t:default>1</t:default>
+<t:value>1</t:value>
+</t:parameter>
+<t:parameter name="OsServicePack" description="OS Service Pack Level" type="U8" format="Scalar" hidden="true" valid="true">
+<t:default>1</t:default>
+<t:value>1</t:value>
+</t:parameter>
+</t:paramgroup>
+<t:paramgroup name="SERVER_2008R2_SP0" description="Windows Server 2008 R2 Sp0, 32-bit/64-bit">
+<t:parameter name="OsMajor" description="OS Major Version" type="U8" format="Scalar" hidden="true" valid="true">
+<t:default>6</t:default>
+<t:value>6</t:value>
+</t:parameter>
+<t:parameter name="OsMinor" description="OS Minor Version" type="U8" format="Scalar" hidden="true" valid="true">
+<t:default>1</t:default>
+<t:value>1</t:value>
+</t:parameter>
+<t:parameter name="OsServicePack" description="OS Service Pack Level" type="U8" format="Scalar" hidden="true" valid="true">
+<t:default>0</t:default>
+<t:value>0</t:value>
+</t:parameter>
+</t:paramgroup>
+<t:paramgroup name="SERVER_2008R2_SP1" description="Windows Server 2008 R2 Sp1, 32-bit/64-bit">
+<t:parameter name="OsMajor" description="OS Major Version" type="U8" format="Scalar" hidden="true" valid="true">
+<t:default>6</t:default>
+<t:value>6</t:value>
+</t:parameter>
+<t:parameter name="OsMinor" description="OS Minor Version" type="U8" format="Scalar" hidden="true" valid="true">
+<t:default>1</t:default>
+<t:value>1</t:value>
+</t:parameter>
+<t:parameter name="OsServicePack" description="OS Service Pack Level" type="U8" format="Scalar" hidden="true" valid="true">
+<t:default>1</t:default>
+<t:value>1</t:value>
+</t:parameter>
+</t:paramgroup>
+</t:paramchoice>
+</t:inputparameters>
+<t:outputparameters>
+<t:parameter name="TargetOsArchitecture" description="The architecture of the target operating system" type="String" format="Scalar"></t:parameter>
+</t:outputparameters>
+</t:config>

@@ -151,24 +151,28 @@ char *upper_str(char *pStr)
 
 char *lower_str(char *pStr)
 {
-    static char upStrBuf[65536];
     int idx;
+    char *pNewBuf = NULL;
 
-    memset(upStrBuf, 0x00, sizeof(upStrBuf));
+    pNewBuf = (char *)malloc(65536);
+    if(pNewBuf == NULL)
+        return NULL;
+
+    memset(pNewBuf, 0x00, 65536);
 
     for(idx = 0; pStr[idx] != NULL; ++idx)
     {
         if(pStr[idx] >= 'A' && pStr[idx] <= 'Z')
         {
-            upStrBuf[idx] = pStr[idx] + 32;
+            pNewBuf[idx] = pStr[idx] + 32;
         }
         else
         {
-            upStrBuf[idx] = pStr[idx];
+            pNewBuf[idx] = pStr[idx];
         }
     }
 
-    return upStrBuf;
+    return pNewBuf;
 }
 
 char* strtok_r(
@@ -204,5 +208,40 @@ char* strtok_r(
     return ret;
 }
 
+//产生长度为length的随机字符串
+char* gen_random_string(int length)
+{
+    int flag, i;
+    char* string;
 
+    srand((unsigned)time(NULL));
+    if ((string = (char *)malloc(length + 1)) == NULL )
+    {
+        return NULL ;
+    }
+
+    memset(string, 0x00, length + 1);
+
+    for (i = 0; i < length; i++)
+    {
+        flag = rand() % 3;
+        switch (flag)
+        {
+        case 0:
+            string[i] = 'A' + rand() % 26;
+            break;
+        case 1:
+            string[i] = 'a' + rand() % 26;
+            break;
+        case 2:
+            string[i] = '0' + rand() % 10;
+            break;
+        default:
+            string[i] = 'x';
+            break;
+        }
+    }
+
+    return string;
+}
 

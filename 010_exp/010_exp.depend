@@ -1,0 +1,227 @@
+# depslib dependency file v1.0
+1510307866 source:e:\c_projects\010_exp\main.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<unistd.h>
+	<conio.h>
+	<windows.h>
+	"global.h"
+	"attack.h"
+	"enc_res/dep_lib.h"
+	"enc_res/dummy.h"
+	"utils/ex_string.h"
+	"utils/ipaddr.h"
+	"utils/encode.h"
+
+1506359696 source:e:\c_projects\010_exp\release_resource.c
+	"release_resource.h"
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+
+1506359696 e:\c_projects\010_exp\release_resource.h
+
+1506570106 source:e:\c_projects\010_exp\utils\memorymodule.c
+	<windows.h>
+	<winnt.h>
+	<stddef.h>
+	<tchar.h>
+	<stdint.h>
+	<winbase.h>
+	<stdio.h>
+	"MemoryModule.h"
+	<stdio.h>
+
+1506569940 e:\c_projects\010_exp\utils\memorymodule.h
+	<windows.h>
+
+1506584316 source:e:\c_projects\010_exp\enc_res\res_decode.c
+	"res_decode.h"
+	"../global.h"
+	"../utils/encode.h"
+	<stdio.h>
+	<stdlib.h>
+	<windows.h>
+	<string.h>
+
+1506789967 e:\c_projects\010_exp\global.h
+
+1506579185 e:\c_projects\010_exp\utils\encode.h
+
+1506583361 source:e:\c_projects\010_exp\enc_res\smbtouch.c
+	"smbtouch.h"
+	"../global.h"
+	"res_decode.h"
+
+1506583833 e:\c_projects\010_exp\enc_res\smbtouch.h
+	"../global.h"
+
+1506583833 e:\c_projects\010_exp\enc_res\res_decode.h
+	"../global.h"
+
+1506579190 source:e:\c_projects\010_exp\utils\encode.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<windows.h>
+	"encode.h"
+
+1511022770 source:e:\c_projects\010_exp\attack.c
+	"attack.h"
+	"global.h"
+	"utils/MemoryModule.h"
+	"enc_res/smbtouch.h"
+	"enc_res/rpctouch.h"
+	"enc_res/namedpipetouch.h"
+	"enc_res/eternalromance.h"
+	"enc_res/eternalblue.h"
+	"enc_res/eternalchampion.h"
+	"enc_res/doublepulsar.h"
+	"enc_res/test.h"
+	"utils/load_exe.h"
+	"utils/op_pipe.h"
+	"utils/ex_string.h"
+	<stdio.h>
+	<stdlib.h>
+	<windows.h>
+
+1507364245 e:\c_projects\010_exp\attack.h
+	"global.h"
+
+1506668590 source:e:\c_projects\010_exp\enc_res\test.c
+	"test.h"
+	"../global.h"
+	"res_decode.h"
+
+1506585636 e:\c_projects\010_exp\enc_res\test.h
+	"../global.h"
+
+1506745531 e:\c_projects\010_exp\utils\load_exe.h
+	<windows.h>
+
+1506665131 source:e:\c_projects\010_exp\utils\load_exe.cpp
+	<windows.h>
+	<stdio.h>
+
+1509127040 source:e:\c_projects\010_exp\utils\load_exe.c
+	"load_exe.h"
+	<stdio.h>
+	<windows.h>
+
+1506754077 e:\c_projects\010_exp\utils\op_pipe.h
+	<windows.h>
+
+1507361998 source:e:\c_projects\010_exp\utils\op_pipe.c
+	"op_pipe.h"
+	<stdio.h>
+	<stdlib.h>
+	<windows.h>
+
+1509162645 e:\c_projects\010_exp\utils\ex_string.h
+
+1510298842 source:e:\c_projects\010_exp\utils\ex_string.c
+	"ex_string.h"
+	<stdio.h>
+	<string.h>
+
+1506791097 e:\c_projects\010_exp\enc_res\eternalromance.h
+	"../global.h"
+
+1506791123 source:e:\c_projects\010_exp\enc_res\eternalromance.c
+	"eternalromance.h"
+	"res_decode.h"
+	"../global.h"
+
+1506794625 source:e:\c_projects\010_exp\enc_res\doublepulsar.c
+	"doublepulsar.h"
+	"res_decode.h"
+	"../global.h"
+
+1506796414 e:\c_projects\010_exp\enc_res\doublepulsar.h
+	"../global.h"
+
+1506797336 source:e:\c_projects\010_exp\enc_res\eternalblue.c
+	"eternalblue.h"
+	"res_decode.h"
+	"../global.h"
+
+1506797336 e:\c_projects\010_exp\enc_res\eternalblue.h
+	"../global.h"
+
+1506828275 source:e:\c_projects\010_exp\enc_res\eternalchampion.c
+	"eternalchampion.h"
+	"res_decode.h"
+	"../global.h"
+
+1506828275 e:\c_projects\010_exp\enc_res\eternalchampion.h
+	"../global.h"
+
+1510232451 source:e:\c_projects\010_exp\enc_res\dep_lib.c
+	"dep_lib.h"
+	"res_decode.h"
+	"../global.h"
+	"../zip/zip.h"
+	<stdio.h>
+	<stdlib.h>
+
+1507134270 e:\c_projects\010_exp\enc_res\dep_lib.h
+	"../global.h"
+
+1500588788 source:e:\c_projects\010_exp\zip\zip.c
+	"zip.h"
+	"miniz.h"
+	<errno.h>
+	<sys/stat.h>
+	<time.h>
+	<direct.h>
+
+1500588788 e:\c_projects\010_exp\zip\zip.h
+	<string.h>
+
+1500588788 e:\c_projects\010_exp\zip\miniz.h
+	<stdlib.h>
+	<time.h>
+	<string.h>
+	<assert.h>
+	<stdio.h>
+	<sys/stat.h>
+	<sys/utime.h>
+	<sys/utime.h>
+	<sys/utime.h>
+	<utime.h>
+	<utime.h>
+
+1507222194 e:\c_projects\010_exp\enc_res\rpctouch.h
+	"../global.h"
+
+1507315443 source:e:\c_projects\010_exp\enc_res\namedpipetouch.c
+	"namedpipetouch.h"
+	"../global.h"
+	"res_decode.h"
+
+1507224823 e:\c_projects\010_exp\enc_res\namedpipetouch.h
+	"../global.h"
+
+1507222194 source:e:\c_projects\010_exp\enc_res\rpctouch.c
+	"rpctouch.h"
+	"../global.h"
+	"res_decode.h"
+
+1508496455 e:\c_projects\010_exp\utils\ipaddr.h
+
+1508757424 source:e:\c_projects\010_exp\utils\ipaddr.c
+	"ipaddr.h"
+	"ex_string.h"
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+
+1509162220 source:e:\c_projects\010_exp\enc_res\dummy.c
+	"dummy.h"
+	"../global.h"
+	"res_decode.h"
+
+1509162220 e:\c_projects\010_exp\enc_res\dummy.h
+	"../global.h"
+

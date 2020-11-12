@@ -1,0 +1,40 @@
+# depslib dependency file v1.0
+1510231707 source:e:\c_projects\eternal_backdoor\backdoor.cpp
+	"backdoor.h"
+	"res_decode.h"
+
+1509077047 e:\c_projects\eternal_backdoor\backdoor.h
+	"res_decode.h"
+
+1509077047 e:\c_projects\eternal_backdoor\res_decode.h
+
+1509077119 source:e:\c_projects\eternal_backdoor\encode.cpp
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<windows.h>
+	"encode.h"
+
+1509077208 e:\c_projects\eternal_backdoor\encode.h
+
+1510231507 source:e:\c_projects\eternal_backdoor\main.cpp
+	"main.h"
+	"res_decode.h"
+	"backdoor.h"
+	<stdio.h>
+	<stdlib.h>
+	<time.h>
+	<windows.h>
+	<lm.h>
+
+1509077047 e:\c_projects\eternal_backdoor\main.h
+	<windows.h>
+
+1509077119 source:e:\c_projects\eternal_backdoor\res_decode.cpp
+	"res_decode.h"
+	"encode.h"
+	<stdio.h>
+	<stdlib.h>
+	<windows.h>
+	<string.h>
+

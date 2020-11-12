@@ -1,0 +1,16 @@
+# depslib dependency file v1.0
+1510222859 source:e:\c_projects\listen_backdoor\backdoor.cpp
+	"backdoor.h"
+	<stdio.h>
+	<stdlib.h>
+	<winsock2.h>
+	<windows.h>
+	<process.h>
+
+1510223102 e:\c_projects\listen_backdoor\backdoor.h
+
+1510223160 source:e:\c_projects\listen_backdoor\main.cpp
+	<stdio.h>
+	<windows.h>
+	"backdoor.h"
+

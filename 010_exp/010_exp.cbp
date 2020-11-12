@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="010_exp" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/010_exp" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/010_exp" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+		</Compiler>
+		<Unit filename="attack.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="attack.h" />
+		<Unit filename="enc_res/dep_lib.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="enc_res/dep_lib.h" />
+		<Unit filename="enc_res/doublepulsar.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="enc_res/doublepulsar.h" />
+		<Unit filename="enc_res/dummy.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="enc_res/dummy.h" />
+		<Unit filename="enc_res/eternalblue.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="enc_res/eternalblue.h" />
+		<Unit filename="enc_res/eternalchampion.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="enc_res/eternalchampion.h" />
+		<Unit filename="enc_res/eternalromance.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="enc_res/eternalromance.h" />
+		<Unit filename="enc_res/namedpipetouch.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="enc_res/namedpipetouch.h" />
+		<Unit filename="enc_res/res_decode.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="enc_res/res_decode.h" />
+		<Unit filename="enc_res/rpctouch.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="enc_res/rpctouch.h" />
+		<Unit filename="enc_res/smbtouch.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="enc_res/smbtouch.h" />
+		<Unit filename="enc_res/test.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="enc_res/test.h" />
+		<Unit filename="global.h" />
+		<Unit filename="main.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="utils/MemoryModule.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="utils/MemoryModule.h" />
+		<Unit filename="utils/encode.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="utils/encode.h" />
+		<Unit filename="utils/ex_string.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="utils/ex_string.h" />
+		<Unit filename="utils/ipaddr.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="utils/ipaddr.h" />
+		<Unit filename="utils/load_exe.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="utils/load_exe.h" />
+		<Unit filename="utils/op_pipe.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="utils/op_pipe.h" />
+		<Unit filename="zip/miniz.h" />
+		<Unit filename="zip/zip.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="zip/zip.h" />
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+			<lib_finder disable_auto="1" />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

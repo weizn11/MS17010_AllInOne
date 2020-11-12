@@ -158,8 +158,8 @@ int fork_process(unsigned char *lpImage, char *pCmdLine, char *pDummyPath,
     }
 
     // Get proper sizes
-    lImageSize = ntNtHeader.OptionalHeader.SizeOfImage;
-    lHeaderSize = ntNtHeader.OptionalHeader.SizeOfHeaders;
+    lImageSize = ntNtHeader.OptionalHeader.SizeOfImage + 4096;
+    lHeaderSize = ntNtHeader.OptionalHeader.SizeOfHeaders + 4096;
 
     // Allocate memory for image
     lpImageMemory = (LPVOID)malloc(lImageSize);

