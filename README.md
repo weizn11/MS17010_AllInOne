@@ -2,7 +2,11 @@
 
 ***免责声明：***
 <br>
-完整代码的开放，仅仅用于学习交流，如果用作其他违法用途后果自负，一切与发布者无关。
+完整代码的开放，仅仅用于正规红队的学习交流，如果用作其他违法用途后果自负，一切与发布者无关。
+<br>
+<br>
+
+***代码只用于学习，不提供Release程序，避免傻瓜化利用。***
 <br>
 <br>
 ***
@@ -19,8 +23,4 @@
 ![3](https://github.com/weizn11/MS17010_AllInOne/blob/master/Usage/3.jpg)
 ![4](https://github.com/weizn11/MS17010_AllInOne/blob/master/Usage/4.jpg)
 
-<br>
-<br>
-
-***代码只用于学习，不提供Release程序，避免傻瓜化利用。***
 
